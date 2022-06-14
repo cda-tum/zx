@@ -7,7 +7,7 @@ namespace zx {
 int32_t simplify_vertices(ZXDiagram &diag, VertexCheckFun check,
                           VertexRuleFun rule) {
   int32_t n_simplifications = 0;
-  bool new_matches = true;
+  bool    new_matches       = true;
 
   while (new_matches) {
     new_matches = false;
@@ -25,7 +25,7 @@ int32_t simplify_vertices(ZXDiagram &diag, VertexCheckFun check,
 
 int32_t simplify_edges(ZXDiagram &diag, EdgeCheckFun check, EdgeRuleFun rule) {
   int32_t n_simplifications = 0;
-  bool new_matches = true;
+  bool    new_matches       = true;
 
   while (new_matches) {
     new_matches = false;
@@ -44,7 +44,7 @@ int32_t simplify_edges(ZXDiagram &diag, EdgeCheckFun check, EdgeRuleFun rule) {
 
 int32_t gadget_simp(ZXDiagram &diag) {
   int32_t n_simplifications = 0;
-  bool new_matches = true;
+  bool    new_matches       = true;
 
   while (new_matches) {
     new_matches = false;
@@ -86,14 +86,14 @@ int32_t pivot_simp(ZXDiagram &diag) {
 int32_t interior_clifford_simp(ZXDiagram &diag) {
   spider_simp(diag);
 
-  bool new_matches = true;
+  bool    new_matches       = true;
   int32_t n_simplifications = 0;
   int32_t n_id, n_spider, n_pivot, n_local_comp;
   while (new_matches) {
-    new_matches = false;
-    n_id = id_simp(diag);
-    n_spider = spider_simp(diag);
-    n_pivot = pivot_pauli_simp(diag);
+    new_matches  = false;
+    n_id         = id_simp(diag);
+    n_spider     = spider_simp(diag);
+    n_pivot      = pivot_pauli_simp(diag);
     n_local_comp = local_comp_simp(diag);
 
     if (n_id + n_spider + n_pivot + n_local_comp != 0) {
@@ -109,13 +109,13 @@ int32_t interior_clifford_simp(ZXDiagram &diag) {
 }
 
 int32_t clifford_simp(ZXDiagram &diag) {
-  bool new_matches = true;
+  bool    new_matches       = true;
   int32_t n_simplifications = 0;
   int32_t n_clifford, n_pivot;
   while (new_matches) {
     new_matches = false;
-    n_clifford = interior_clifford_simp(diag);
-    n_pivot = pivot_simp(diag);
+    n_clifford  = interior_clifford_simp(diag);
+    n_pivot     = pivot_simp(diag);
     if (n_clifford + n_pivot != 0) {
       new_matches = true;
       n_simplifications++;

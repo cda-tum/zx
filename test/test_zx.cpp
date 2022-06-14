@@ -1,12 +1,12 @@
 #include <cstdint>
 #include <gtest/gtest.h>
-//#include "..Hexagram.hpp"
+// #include "..Hexagram.hpp"
 #include "../include/Simplify.hpp"
 #include "../include/ZXDiagram.hpp"
+#include "dd/Definitions.hpp"
 #include "Definitions.hpp"
 #include "Expression.hpp"
 #include "Rational.hpp"
-#include "dd/Definitions.hpp"
 
 using zx::Expression;
 
@@ -55,7 +55,7 @@ TEST_F(RationalTest, from_double_7) {
 TEST_F(RationalTest, add) {
   zx::PyRational r0(1, 8);
   zx::PyRational r1(7, 8);
-  auto r = r0 + r1;
+  auto           r = r0 + r1;
 
   EXPECT_EQ(r, 1);
 }
@@ -63,7 +63,7 @@ TEST_F(RationalTest, add) {
 TEST_F(RationalTest, add_2) {
   zx::PyRational r0(9, 8);
   zx::PyRational r1(7, 8);
-  auto r = r0 + r1;
+  auto           r = r0 + r1;
 
   EXPECT_EQ(r, 0);
 }
@@ -71,7 +71,7 @@ TEST_F(RationalTest, add_2) {
 TEST_F(RationalTest, sub) {
   zx::PyRational r0(9, 8);
   zx::PyRational r1(-7, 8);
-  auto r = r0 - r1;
+  auto           r = r0 - r1;
 
   EXPECT_EQ(r, 0);
 }
@@ -79,7 +79,7 @@ TEST_F(RationalTest, sub) {
 TEST_F(RationalTest, sub_2) {
   zx::PyRational r0(-1, 2);
   zx::PyRational r1(1, 2);
-  auto r = r0 - r1;
+  auto           r = r0 - r1;
 
   EXPECT_EQ(r, 1);
 }
@@ -87,7 +87,7 @@ TEST_F(RationalTest, sub_2) {
 TEST_F(RationalTest, mul) {
   zx::PyRational r0(1, 8);
   zx::PyRational r1(1, 2);
-  auto r = r0 * r1;
+  auto           r = r0 * r1;
 
   EXPECT_EQ(r, zx::PyRational(1, 16));
 }
@@ -95,7 +95,7 @@ TEST_F(RationalTest, mul) {
 TEST_F(RationalTest, mul_2) {
   zx::PyRational r0(1, 8);
   zx::PyRational r1(0, 1);
-  auto r = r0 * r1;
+  auto           r = r0 * r1;
 
   EXPECT_EQ(r, 0);
 }
@@ -103,7 +103,7 @@ TEST_F(RationalTest, mul_2) {
 TEST_F(RationalTest, div) {
   zx::PyRational r0(1, 2);
   zx::PyRational r1(1, 2);
-  auto r = r0 / r1;
+  auto           r = r0 / r1;
 
   EXPECT_EQ(r, 1);
 }
@@ -248,7 +248,7 @@ protected:
 
 zx::ZXDiagram make_identity_diagram(int32_t nqubits,
                                     int32_t spiders_per_qubit) {
-  zx::ZXDiagram diag(nqubits);
+  zx::ZXDiagram           diag(nqubits);
   std::vector<zx::Vertex> rightmost_vertices = diag.get_inputs();
 
   for (auto i = 0; i < nqubits; i++)
@@ -279,9 +279,9 @@ zx::ZXDiagram make_empty_diagram(int32_t nqubits) {
 }
 
 TEST_F(SimplifyTest, id_simp) {
-  int32_t nqubits = 3;
-  int32_t spiders = 100;
-  zx::ZXDiagram diag = make_identity_diagram(nqubits, spiders);
+  int32_t       nqubits = 3;
+  int32_t       spiders = 100;
+  zx::ZXDiagram diag    = make_identity_diagram(nqubits, spiders);
 
   int32_t removed = zx::id_simp(diag);
 
@@ -292,9 +292,9 @@ TEST_F(SimplifyTest, id_simp) {
 
 TEST_F(SimplifyTest, id_simp_2) {
 
-  int32_t nqubits = 2;
-  int32_t spiders = 100;
-  zx::ZXDiagram diag = make_identity_diagram(nqubits, spiders);
+  int32_t       nqubits = 2;
+  int32_t       spiders = 100;
+  zx::ZXDiagram diag    = make_identity_diagram(nqubits, spiders);
 
   diag.add_edge(50, 150); // make vertices 50 and 150 non-removable
 
@@ -305,9 +305,9 @@ TEST_F(SimplifyTest, id_simp_2) {
 }
 
 TEST_F(SimplifyTest, spider_fusion) {
-  int32_t nqubits = 1;
-  int32_t nspiders = 100;
-  zx::ZXDiagram diag = make_identity_diagram(nqubits, nspiders);
+  int32_t       nqubits  = 1;
+  int32_t       nspiders = 100;
+  zx::ZXDiagram diag     = make_identity_diagram(nqubits, nspiders);
 
   for (zx::Vertex v = 2; v < diag.get_nvertices(); v++)
     diag.add_phase(v, zx::Expression(zx::PyRational(1, 1)));
@@ -321,9 +321,9 @@ TEST_F(SimplifyTest, spider_fusion) {
 }
 
 TEST_F(SimplifyTest, spider_fusion_2) {
-  int32_t nqubits = 2;
-  int32_t nspiders = 5;
-  zx::ZXDiagram diag = make_identity_diagram(nqubits, nspiders);
+  int32_t       nqubits  = 2;
+  int32_t       nspiders = 5;
+  zx::ZXDiagram diag     = make_identity_diagram(nqubits, nspiders);
 
   diag.add_edge(6, 11);
 
@@ -343,9 +343,9 @@ TEST_F(SimplifyTest, spider_fusion_2) {
 }
 
 TEST_F(SimplifyTest, spider_fusion_parallel_edges) {
-  int32_t nqubits = 1;
-  int32_t nspiders = 3;
-  zx::ZXDiagram diag = make_identity_diagram(nqubits, nspiders);
+  int32_t       nqubits  = 1;
+  int32_t       nspiders = 3;
+  zx::ZXDiagram diag     = make_identity_diagram(nqubits, nspiders);
   diag.add_edge(2, 4);
   diag.set_type(4, zx::VertexType::X);
 
@@ -434,9 +434,9 @@ TEST_F(SimplifyTest, pivot_pauli) {
 }
 
 TEST_F(SimplifyTest, interior_clifford) {
-  int32_t nqubits = 100;
-  int32_t qubit_spiders = 100;
-  zx::ZXDiagram diag = make_identity_diagram(nqubits, qubit_spiders);
+  int32_t       nqubits       = 100;
+  int32_t       qubit_spiders = 100;
+  zx::ZXDiagram diag          = make_identity_diagram(nqubits, qubit_spiders);
 
   zx::interior_clifford_simp(diag);
 
@@ -650,7 +650,7 @@ TEST_F(SimplifyTest, full_reduce_2) {
 
 TEST_F(SimplifyTest, full_reduce_3) {
   zx::ZXDiagram diag("circuits/bell_state.qasm");
-  auto h = diag;
+  auto          h = diag;
   diag.invert();
   diag.concat(h);
 
@@ -758,7 +758,7 @@ protected:
 TEST_F(SymbolicTest, id_simp) {
   int32_t nqubits = 50;
 
-  zx::ZXDiagram diag = make_identity_diagram(nqubits, 100);
+  zx::ZXDiagram  diag = make_identity_diagram(nqubits, 100);
   zx::Expression e;
   e += x;
   diag.set_phase(nqubits * 2 + 5, e);
@@ -856,7 +856,6 @@ TEST_F(SymbolicTest, equivalence) {
   EXPECT_EQ(d1.get_nedges(), 3);
   EXPECT_EQ(d1.get_nvertices(), 6);
   EXPECT_TRUE(d1.is_identity());
-
 }
 
 int main(int argc, char **argv) {

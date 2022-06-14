@@ -12,9 +12,9 @@ bool check_id_simp(ZXDiagram &diag, Vertex v) {
 }
 
 void remove_id(ZXDiagram &diag, Vertex v) {
-  auto edges = diag.incident_edges(v);
-  Vertex v0 = edges[0].to;
-  Vertex v1 = edges[1].to;
+  auto   edges = diag.incident_edges(v);
+  Vertex v0    = edges[0].to;
+  Vertex v1    = edges[1].to;
 
   EdgeType type = EdgeType::Simple;
   if (edges[0].type != edges[1].type) {
@@ -56,7 +56,7 @@ bool check_local_comp(ZXDiagram &diag, Vertex v) {
 }
 
 void local_comp(ZXDiagram &diag, Vertex v) { // TODO:scalars
-  auto phase = -diag.phase(v);
+  auto  phase = -diag.phase(v);
   auto &edges = diag.incident_edges(v);
 
   for (size_t i = 0; i < edges.size(); i++) {
@@ -92,8 +92,8 @@ bool check_pivot_pauli(ZXDiagram &diag, Vertex v0, Vertex v1) {
     return false;
   }
 
-  auto &edges_v0 = diag.incident_edges(v0);
-  auto is_valid_edge = [&](const Edge &e) {
+  auto &edges_v0      = diag.incident_edges(v0);
+  auto  is_valid_edge = [&](const Edge &e) {
     return diag.type(e.to) == VertexType::Z && e.type == EdgeType::Hadamard;
   };
 
@@ -154,8 +154,8 @@ bool check_pivot(ZXDiagram &diag, Vertex v0, Vertex v1) {
     return false;
   }
 
-  auto &edges_v0 = diag.incident_edges(v0);
-  auto is_invalid_edge = [&](const Edge &e) {
+  auto &edges_v0        = diag.incident_edges(v0);
+  auto  is_invalid_edge = [&](const Edge &e) {
     auto to_type = diag.type(e.to);
     return !((to_type == VertexType::Z && e.type == EdgeType::Hadamard) ||
              to_type == VertexType::Boundary);
@@ -184,9 +184,9 @@ bool check_pivot(ZXDiagram &diag, Vertex v0, Vertex v1) {
 }
 
 static void extract_gadget(ZXDiagram &diag, Vertex v) {
-  auto v_data = diag.get_vdata(v).value();
+  auto   v_data     = diag.get_vdata(v).value();
   Vertex phase_vert = diag.add_vertex(v_data.qubit, -2, v_data.phase);
-  Vertex id_vert = diag.add_vertex(v_data.qubit, -1);
+  Vertex id_vert    = diag.add_vertex(v_data.qubit, -1);
   diag.set_phase(v, Expression(PiRational(0, 1)));
   diag.add_hadamard_edge(v, id_vert);
   diag.add_hadamard_edge(id_vert, phase_vert);
@@ -224,7 +224,7 @@ static void ensure_interior(ZXDiagram &diag, Vertex v) {
   //   }
   // }
 
-  auto edges = diag.incident_edges(v);
+  auto edges  = diag.incident_edges(v);
   auto v_data = diag.get_vdata(v).value();
 
   for (auto &[to, type] : edges) {
@@ -317,7 +317,7 @@ bool check_and_fuse_gadget(ZXDiagram &diag, Vertex v) {
     // n0_etype = etype;
   }
 
-  Vertex id1 = -1;
+  Vertex id1          = -1;
   Vertex phase_spider = -1;
 
   bool found_gadget = false;
@@ -332,7 +332,7 @@ bool check_and_fuse_gadget(ZXDiagram &diag, Vertex v) {
     }
 
     found_gadget = true;
-    id1 = n;
+    id1          = n;
 
     for (auto &[nn, nn_etype] :
          diag.incident_edges(id1)) { // Todo: maybe problem with parallel edge?

@@ -32,7 +32,8 @@ ZXDiagram::ZXDiagram(int32_t nqubits) {
 //       auto tar2 = op2->getTargets()[0];
 //       auto ctrl1 = (*op1->getControls().begin()).qubit;
 //       auto ctrl2 = (*op2->getControls().begin()).qubit;
-//       return ctrl == tar1 && tar1 == ctrl2 && target == ctrl1 && ctrl1 == tar2;
+//       return ctrl == tar1 && tar1 == ctrl2 && target == ctrl1 && ctrl1 ==
+//       tar2;
 //     }
 //   }
 //   return false;
@@ -49,7 +50,8 @@ ZXDiagram::ZXDiagram(int32_t nqubits) {
 //     for (auto i = 0; i < get_nqubits(); i++) {
 //       new_qubit_vertices[i] = qubit_vertices[i];
 //     }
-//     for (auto &[tar, src] : qc.initialLayout) { // reverse initial permutation
+//     for (auto &[tar, src] : qc.initialLayout) { // reverse initial
+//     permutation
 //       if (tar == src)
 //         continue;
 //       auto v_tar = add_vertex(tar, 1);
@@ -187,17 +189,17 @@ void ZXDiagram::remove_vertex(Vertex to_remove) {
     return false;
 
   auto &incident = edges[from];
-  auto edge = std::find_if(incident.begin(), incident.end(),
-                           [&](auto &edge) { return edge.to == to; });
+  auto  edge     = std::find_if(incident.begin(), incident.end(),
+                                [&](auto &edge) { return edge.to == to; });
   return edge != incident.end();
 }
 
 [[nodiscard]] std::optional<Edge> ZXDiagram::get_edge(Vertex from,
                                                       Vertex to) const {
   std::optional<Edge> ret;
-  auto &incident = edges[from];
-  auto edge = std::find_if(incident.begin(), incident.end(),
-                           [&](auto &edge) { return edge.to == to; });
+  auto               &incident = edges[from];
+  auto                edge     = std::find_if(incident.begin(), incident.end(),
+                                              [&](auto &edge) { return edge.to == to; });
   if (edge != incident.end())
     ret = *edge;
   return ret;
@@ -205,8 +207,8 @@ void ZXDiagram::remove_vertex(Vertex to_remove) {
 
 std::vector<Edge>::iterator ZXDiagram::get_edge_ptr(Vertex from, Vertex to) {
   auto &incident = edges[from];
-  auto edge = std::find_if(incident.begin(), incident.end(),
-                           [&](auto &edge) { return edge.to == to; });
+  auto  edge     = std::find_if(incident.begin(), incident.end(),
+                                [&](auto &edge) { return edge.to == to; });
   return edge;
 }
 
@@ -252,8 +254,8 @@ void ZXDiagram::to_graph_like() {
 }
 
 ZXDiagram &ZXDiagram::invert() {
-  auto h = inputs;
-  inputs = outputs;
+  auto h  = inputs;
+  inputs  = outputs;
   outputs = h;
 
   for (auto &data : vertices) {
@@ -275,7 +277,7 @@ ZXDiagram &ZXDiagram::concat(const ZXDiagram &rhs) {
       continue;
 
     auto new_v = add_vertex(rhs.vertices[i].value());
-    new_vs[i] = new_v;
+    new_vs[i]  = new_v;
   }
 
   for (size_t i = 0; i < rhs.vertices.size(); i++) { // add new edges
@@ -333,8 +335,7 @@ bool ZXDiagram::is_identity() const {
 //   return true;
 // }
 
-void ZXDiagram::add_z_spider(Qubit qubit,
-                             std::vector<Vertex> &qubit_vertices,
+void ZXDiagram::add_z_spider(Qubit qubit, std::vector<Vertex> &qubit_vertices,
                              const Expression &phase, EdgeType type) {
   auto new_vertex = add_vertex(
       {vertices[qubit].value().col + 1, qubit, phase, VertexType::Z});
@@ -343,9 +344,8 @@ void ZXDiagram::add_z_spider(Qubit qubit,
   qubit_vertices[qubit] = new_vertex;
 }
 
-void ZXDiagram::add_x_spider(Qubit qubit,
-                             std::vector<Vertex> &qubit_vertices,
-                             const Expression & phase, EdgeType type) {
+void ZXDiagram::add_x_spider(Qubit qubit, std::vector<Vertex> &qubit_vertices,
+                             const Expression &phase, EdgeType type) {
   auto new_vertex = add_vertex(
       {vertices[qubit].value().col + 1, qubit, phase, VertexType::X});
   add_edge(qubit_vertices[qubit], new_vertex, type);
@@ -380,7 +380,7 @@ void ZXDiagram::add_swap(Qubit ctrl, Qubit target,
   add_edge(s1, t0);
 
   qubit_vertices[target] = t0;
-  qubit_vertices[ctrl] = t1;
+  qubit_vertices[ctrl]   = t1;
 }
 
 void ZXDiagram::add_ccx(Qubit ctrl_0, Qubit ctrl_1, Qubit target,
@@ -420,7 +420,7 @@ std::vector<Vertex> ZXDiagram::init_graph(int nqubits) {
 void ZXDiagram::close_graph(std::vector<Vertex> &qubit_vertices) {
   for (Vertex v : qubit_vertices) {
     VertexData v_data = vertices[v].value();
-    Vertex new_v = add_vertex(
+    Vertex     new_v  = add_vertex(
         {v_data.col + 1, v_data.qubit, Expression(), VertexType::Boundary});
     add_edge(v, new_v);
     outputs.push_back(new_v);
@@ -428,7 +428,7 @@ void ZXDiagram::close_graph(std::vector<Vertex> &qubit_vertices) {
 }
 
 void ZXDiagram::make_ancilla(Qubit qubit) {
-  auto in_v = inputs[qubit];
+  auto in_v  = inputs[qubit];
   auto out_v = outputs[qubit];
   // auto new_in = add_vertex(qubit, 0, PiRational(0,1), VertexType::Boundary);
   // auto new_out = add_vertex(qubit, 0, PiRational(0,1), VertexType::Boundary);
@@ -462,8 +462,8 @@ void ZXDiagram::make_ancilla(Qubit qubit) {
 //     case qc::OpType::RZ:
 //     case qc::OpType::Phase: {
 
-//       add_z_spider(target, qubit_vertices, Expression(PiRational(op->getParameter()[0])));
-//       break;
+//       add_z_spider(target, qubit_vertices,
+//       Expression(PiRational(op->getParameter()[0]))); break;
 //     }
 //     case qc::OpType::X: {
 //       add_x_spider(target, qubit_vertices, Expression(PiRational(1, 1)));
@@ -471,8 +471,8 @@ void ZXDiagram::make_ancilla(Qubit qubit) {
 //     }
 
 //     case qc::OpType::RX: {
-//       add_x_spider(target, qubit_vertices, Expression(PiRational(op->getParameter()[0])));
-//       break;
+//       add_x_spider(target, qubit_vertices,
+//       Expression(PiRational(op->getParameter()[0]))); break;
 //     }
 
 //     case qc::OpType::Y: {
@@ -486,7 +486,8 @@ void ZXDiagram::make_ancilla(Qubit qubit) {
 //       // PiRational(op->getParameter()[2]));
 //       add_x_spider(target, qubit_vertices, Expression(PiRational(1, 2)));
 //       add_z_spider(target, qubit_vertices,
-//                    Expression(PiRational(op->getParameter()[0])) + PiRational(1, 1));
+//                    Expression(PiRational(op->getParameter()[0])) +
+//                    PiRational(1, 1));
 //       add_x_spider(target, qubit_vertices, Expression(PiRational(1, 2)));
 //       add_z_spider(target, qubit_vertices, Expression(PiRational(3, 1)));
 //       break;
@@ -509,20 +510,25 @@ void ZXDiagram::make_ancilla(Qubit qubit) {
 //     }
 //     case qc::OpType::U2: {
 //       add_z_spider(target, qubit_vertices,
-//                    Expression(PiRational(op->getParameter()[0])) - PiRational(1, 2));
+//                    Expression(PiRational(op->getParameter()[0])) -
+//                    PiRational(1, 2));
 //       add_x_spider(target, qubit_vertices, Expression(PiRational(1, 2)));
 //       add_z_spider(target, qubit_vertices,
-//                    Expression(PiRational(op->getParameter()[1])) + PiRational(1, 2));
+//                    Expression(PiRational(op->getParameter()[1])) +
+//                    PiRational(1, 2));
 //       break;
 //     }
 //     case qc::OpType::U3: {
-//       add_z_spider(target, qubit_vertices, Expression(PiRational(op->getParameter()[0])));
+//       add_z_spider(target, qubit_vertices,
+//       Expression(PiRational(op->getParameter()[0]))); add_x_spider(target,
+//       qubit_vertices, Expression(PiRational(1, 2))); add_z_spider(target,
+//       qubit_vertices,
+//                    Expression(PiRational(op->getParameter()[2])) +
+//                    PiRational(1, 1));
 //       add_x_spider(target, qubit_vertices, Expression(PiRational(1, 2)));
 //       add_z_spider(target, qubit_vertices,
-//                    Expression(PiRational(op->getParameter()[2])) + PiRational(1, 1));
-//       add_x_spider(target, qubit_vertices, Expression(PiRational(1, 2)));
-//       add_z_spider(target, qubit_vertices,
-//                    Expression(PiRational(op->getParameter()[1])) + PiRational(3, 1));
+//                    Expression(PiRational(op->getParameter()[1])) +
+//                    PiRational(3, 1));
 //       break;
 //     }
 

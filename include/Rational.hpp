@@ -1,12 +1,12 @@
 #ifndef ZX_INCLUDE_RATIONAL_HPP_
 #define ZX_INCLUDE_RATIONAL_HPP_
 
+#include <gmpxx.h>
 #include <iostream>
 #include <stdint.h>
-#include <gmpxx.h>
 
 namespace zx {
-    
+
 /*
  * Representation of fractions as multiples of pi
  * Rationals can only have values in the half-open interval (-1,1],
@@ -14,7 +14,7 @@ namespace zx {
  */
 class PiRational {
   void normalize();
-  
+
 public:
   mpz_class num, denom;
 
@@ -42,7 +42,7 @@ public:
 
   // double to_double() const;
   bool is_integer() const { return denom == 1; }
-  bool is_zero() const {return num == 0;}
+  bool is_zero() const { return num == 0; }
 };
 
 inline PiRational operator-(const PiRational &rhs) {
@@ -136,9 +136,13 @@ inline bool operator>=(const PiRational &lhs, const PiRational &rhs) {
   return rhs <= lhs;
 }
 
-inline bool operator>=(const PiRational &lhs, int64_t rhs) { return rhs <= lhs; }
+inline bool operator>=(const PiRational &lhs, int64_t rhs) {
+  return rhs <= lhs;
+}
 
-inline bool operator>=(int64_t lhs, const PiRational &rhs) { return rhs <= lhs; }
+inline bool operator>=(int64_t lhs, const PiRational &rhs) {
+  return rhs <= lhs;
+}
 
 inline bool operator==(const PiRational &lhs, const PiRational &rhs) {
   return lhs.num == rhs.num && lhs.denom == rhs.denom;
@@ -148,7 +152,9 @@ inline bool operator==(const PiRational &lhs, int64_t rhs) {
   return lhs.num == rhs && lhs.denom == 1;
 }
 
-inline bool operator==(int64_t lhs, const PiRational &rhs) { return rhs == lhs; }
+inline bool operator==(int64_t lhs, const PiRational &rhs) {
+  return rhs == lhs;
+}
 
 inline bool operator!=(const PiRational &lhs, const PiRational &rhs) {
   return !(lhs == rhs);

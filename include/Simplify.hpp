@@ -6,9 +6,9 @@
 
 namespace zx {
 using VertexCheckFun = decltype(check_id_simp);
-using VertexRuleFun = decltype(remove_id);
-using EdgeCheckFun = decltype(check_spider_fusion);
-using EdgeRuleFun = decltype(fuse_spiders);
+using VertexRuleFun  = decltype(remove_id);
+using EdgeCheckFun   = decltype(check_spider_fusion);
+using EdgeRuleFun    = decltype(fuse_spiders);
 
 int32_t simplify_vertices(ZXDiagram &diag, VertexCheckFun check,
                           VertexRuleFun rule);

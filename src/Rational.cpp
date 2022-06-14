@@ -17,22 +17,22 @@ mpz_class gcd(mpz_class a, mpz_class b) {
 PiRational::PiRational(double val) : num(0), denom(1) {
   if (std::abs(val) < PARAMETER_TOLERANCE)
     return;
-  
+
   double mult_pi = PI / val;
   double nearest = std::round(mult_pi);
   if (std::abs(nearest - mult_pi) < PARAMETER_TOLERANCE) {
     denom = static_cast<int>(nearest);
-    num = 1;
-    if(denom < 0) {
-      num = -1;
-      denom = - denom;
+    num   = 1;
+    if (denom < 0) {
+      num   = -1;
+      denom = -denom;
     }
 
     return;
   }
-  
+
   val /= PI;
-  val -= 2*static_cast<int>(val/2);
+  val -= 2 * static_cast<int>(val / 2);
   if (val > 1) {
     val -= 2;
   } else if (val <= -1) {
@@ -46,9 +46,9 @@ PiRational::PiRational(double val) : num(0), denom(1) {
   mpz_class gcd_ = gcd(std::round(frac * MAX_DENOM), MAX_DENOM);
 
   denom = MAX_DENOM / gcd_;
-  num = round(frac * MAX_DENOM) / gcd_;
-  if(denom < 0) {
-    num = -num;
+  num   = round(frac * MAX_DENOM) / gcd_;
+  if (denom < 0) {
+    num   = -num;
     denom = -denom;
   }
 }
@@ -59,17 +59,17 @@ void PiRational::normalize() {
   } else if (*this <= -1) {
     num += 2 * denom;
   }
-  if(num == 0) {
+  if (num == 0) {
     denom = 1;
     return;
   }
-    
+
   mpz_class g = gcd(num, denom);
   num /= g;
   denom /= g;
 
   if (denom < 0) {
-    num = -num;
+    num   = -num;
     denom = -denom;
   }
 }
@@ -77,7 +77,7 @@ void PiRational::normalize() {
 // double PiRational::to_double() const {
 //   return zx::PI * (static_cast<float>(num)) / denom;
 // }
-  
+
 PiRational &PiRational::operator+=(const PiRational &rhs) {
   num = num * rhs.denom + rhs.num * denom;
   denom *= rhs.denom;

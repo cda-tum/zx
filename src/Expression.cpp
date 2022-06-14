@@ -2,7 +2,7 @@
 #include <cmath>
 
 namespace zx {
-void Term::add_coeff(fp r) { coeff += r; }
+void  Term::add_coeff(fp r) { coeff += r; }
 Term &Term::operator*=(fp rhs) {
   coeff *= rhs;
   return *this;
@@ -111,14 +111,15 @@ void Expression::aggregate_equal_terms() {
   }
 }
 
-  bool operator==(const Expression& lhs, const Expression& rhs) {
-    if(lhs.num_terms() != rhs.num_terms() || lhs.get_constant() != rhs.get_constant())
-      return false;
+bool operator==(const Expression &lhs, const Expression &rhs) {
+  if (lhs.num_terms() != rhs.num_terms() ||
+      lhs.get_constant() != rhs.get_constant())
+    return false;
 
-    for(size_t i = 0; i < lhs.num_terms(); ++i) {
-      if(std::abs(lhs[i].get_coeff() - rhs[i].get_coeff()) >= TOLERANCE)
-        return false;
-    }
-    return true;
+  for (size_t i = 0; i < lhs.num_terms(); ++i) {
+    if (std::abs(lhs[i].get_coeff() - rhs[i].get_coeff()) >= TOLERANCE)
+      return false;
   }
+  return true;
+}
 } // namespace zx

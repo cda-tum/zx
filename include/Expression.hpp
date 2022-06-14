@@ -1,8 +1,8 @@
 #ifndef ZX_INCLUDE_EXPRESSION_HPP_
 #define ZX_INCLUDE_EXPRESSION_HPP_
 
-#include "Rational.hpp"
 #include "Definitions.hpp"
+#include "Rational.hpp"
 #include <cmath>
 #include <string>
 #include <vector>
@@ -10,7 +10,7 @@
 namespace zx {
 struct Variable {
   Variable(int32_t id, std::string name) : id(id), name(name){};
-  int32_t id;
+  int32_t     id;
   std::string name;
 };
 
@@ -20,8 +20,8 @@ inline bool operator==(const Variable &lhs, const Variable &rhs) {
 class Term {
 public:
   [[nodiscard]] Variable get_var() const { return var; }
-  [[nodiscard]] double get_coeff() const { return coeff; }
-  [[nodiscard]] bool has_zero_coeff() const {
+  [[nodiscard]] double   get_coeff() const { return coeff; }
+  [[nodiscard]] bool     has_zero_coeff() const {
     return std::abs(coeff) < TOLERANCE;
   }
 
@@ -29,12 +29,12 @@ public:
   Term(double coeff, Variable var) : coeff(coeff), var(var){};
   Term(Variable var) : coeff(1), var(var){};
 
-  Term operator-() const { return Term(-coeff, var); }
+  Term  operator-() const { return Term(-coeff, var); }
   Term &operator*=(double rhs);
   Term &operator/=(double rhs);
 
 private:
-  double coeff;
+  double   coeff;
   Variable var;
 };
 
@@ -52,7 +52,7 @@ inline Term operator/(double lhs, const Term &rhs) { return rhs / lhs; }
 
 class Expression {
 public:
-  using iterator = std::vector<Term>::iterator;
+  using iterator       = std::vector<Term>::iterator;
   using const_iterator = std::vector<Term>::const_iterator;
 
   template <typename... Args> Expression(Term t, Args... ms) {
@@ -72,8 +72,8 @@ public:
   Expression() : constant(PiRational(0, 1)){};
   Expression(PiRational r) : constant(r){};
 
-  iterator begin() { return terms.begin(); }
-  iterator end() { return terms.end(); }
+  iterator       begin() { return terms.begin(); }
+  iterator       end() { return terms.end(); }
   const_iterator begin() const { return terms.cbegin(); }
   const_iterator end() const { return terms.cend(); }
   const_iterator cbegin() const { return terms.cbegin(); }
@@ -89,20 +89,20 @@ public:
   Expression &operator+=(const Term &rhs);
   Expression &operator+=(const PiRational &rhs);
 
-  Expression &operator-=(const Expression &rhs);
-  Expression &operator-=(const Term &rhs);
-  Expression &operator-=(const PiRational &rhs);
+  Expression              &operator-=(const Expression &rhs);
+  Expression              &operator-=(const Term &rhs);
+  Expression              &operator-=(const PiRational &rhs);
   [[nodiscard]] Expression operator-() const;
 
   [[nodiscard]] const Term &operator[](int i) const { return terms[i]; }
-  [[nodiscard]] PiRational get_constant() const { return constant; }
-  [[nodiscard]] auto num_terms() const { return terms.size(); }
+  [[nodiscard]] PiRational  get_constant() const { return constant; }
+  [[nodiscard]] auto        num_terms() const { return terms.size(); }
 
 private:
   std::vector<Term> terms;
-  PiRational constant;
-  void sort_terms();
-  void aggregate_equal_terms();
+  PiRational        constant;
+  void              sort_terms();
+  void              aggregate_equal_terms();
 };
 
 inline Expression operator+(Expression lhs, const Expression &rhs) {
@@ -130,7 +130,7 @@ inline Expression operator-(Expression lhs, const PiRational &rhs) {
   return lhs;
 }
 
-  bool operator==(const Expression& lhs, const Expression& rhs);
+bool operator==(const Expression &lhs, const Expression &rhs);
 } // namespace zx
 
 inline std::ostream &operator<<(std::ostream &os, const zx::Variable &rhs) {

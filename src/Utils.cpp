@@ -6,7 +6,7 @@ Vertices::VertexIterator::VertexIterator(
     : v(v), current_pos(vertices.begin()), vertices(vertices) {
   if ((size_t)v >= vertices.size()) {
     current_pos = vertices.end();
-    v = vertices.size();
+    v           = vertices.size();
   } else {
     current_pos = vertices.begin() + v;
     next_valid_vertex();
@@ -46,7 +46,7 @@ void Vertices::VertexIterator::next_valid_vertex() {
 }
 
 Edges::EdgeIterator::EdgeIterator(
-    std::vector<std::vector<Edge>> &edges,
+    std::vector<std::vector<Edge>>         &edges,
     std::vector<std::optional<VertexData>> &vertices)
     : v(0), current_pos(edges[0].begin()), edges(edges), vertices(vertices) {
   if (vertices.size() != 0) {
@@ -56,17 +56,17 @@ Edges::EdgeIterator::EdgeIterator(
     check_next_vertex();
   } else {
     current_pos = edges.back().end();
-    v = edges.size();
+    v           = edges.size();
   }
 }
 
 Edges::EdgeIterator::EdgeIterator(
-    std::vector<std::vector<Edge>> &edges,
+    std::vector<std::vector<Edge>>         &edges,
     std::vector<std::optional<VertexData>> &vertices, Vertex v)
     : v(v), edges(edges), vertices(vertices) {
   if ((size_t)v >= edges.size()) {
     current_pos = edges.back().end();
-    v = edges.size();
+    v           = edges.size();
   } else {
     current_pos = edges[v].begin();
   }
