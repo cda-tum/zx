@@ -23,9 +23,7 @@ namespace zx {
     public:
         [[nodiscard]] Variable get_var() const { return var; }
         [[nodiscard]] double   get_coeff() const { return coeff; }
-        [[nodiscard]] bool     has_zero_coeff() const {
-            return std::abs(coeff) < TOLERANCE;
-        }
+        [[nodiscard]] bool     has_zero_coeff() const { return std::abs(coeff) < TOLERANCE; }
 
         void add_coeff(double r);
         Term(double coeff, Variable var):
