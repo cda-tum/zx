@@ -88,17 +88,9 @@ namespace zx {
 
     void PiRational::modPi() {
         if (*this > 1) {
-#if defined(GMP)
-            getNumUnsafe() -= 2 * getDenomUnsafe();
-#else
             frac = Rational(getNum() - 2 * getDenom(), getDenom());
-#endif
         } else if (*this <= -1) {
-#if defined(GMP)
-            getNumUnsafe() += 2 * getDenomUnsafe();
-#else
             frac = Rational(getNum() + 2 * getDenom(), getDenom());
-#endif
         }
         if (getNum() == 0) {
             setDenom(1);
