@@ -2,10 +2,9 @@
 
 #if defined(GMP)
     #include "boost/multiprecision/gmp.hpp"
-
-    #include <gmpxx.h>
 using Rational = boost::multiprecision::mpq_rational;
 using BigInt   = boost::multiprecision::mpz_int;
+
 #else
     #include "boost/multiprecision/cpp_int.hpp"
 using Rational = boost::multiprecision::cpp_rational;
@@ -55,6 +54,7 @@ namespace zx {
 
         // double to_double() const;
         [[nodiscard]] bool isInteger() const {
+<<<<<<< HEAD
             return boost::multiprecision::denominator(frac) == 1;
         }
         bool isZero() const {
@@ -66,24 +66,93 @@ namespace zx {
 
         BigInt getNum() const {
             return boost::multiprecision::numerator(frac);
+=======
+    #if defined(GMP)
+            return frac.get_den() == 1;
+    #else
+            return boost::multiprecision::denominator(frac) == 1;
+    #endif
+        }
+        bool isZero() const {
+    #if defined(GMP)
+            return frac.get_num() == 0;
+    #else
+            return boost::multiprecision::numerator(frac) == 0;
+    #endif
+        }
+        BigInt getDenom() const {
+    #if defined(GMP)
+            return frac.get_den();
+    #else
+            return boost::multiprecision::denominator(frac);
+    #endif
+        }
+
+        BigInt getNum() const {
+    #if defined(GMP)
+            return frac.get_num();
+    #else
+            return boost::multiprecision::numerator(frac);
+    #endif
+            >>>>>>> origin / main
         }
 
     private:
         Rational frac;
 
         void normalize() {
-            // frac.normalize();
+<<<<<<< HEAD
+                // frac.normalize();
+=======
+        #if defined(GMP)
+            frac.canonicalize();
+        #else
+                    // frac.normalize();
+        #endif
+            >>>>>>> origin / main
         }
 
         void modPi();
 
         void setNum(const BigInt& num) {
+<<<<<<< HEAD
             boost::multiprecision::numerator(frac) = num;
         }
 
         void setDenom(const BigInt& denom) {
             boost::multiprecision::denominator(frac) = denom;
         }
+=======
+            #if defined(GMP)
+            frac.get_num() = num;
+            #else
+            boost::multiprecision::numerator(frac)   = num;
+            #endif
+        }
+
+        void setDenom(const BigInt& denom) {
+            #if defined(GMP)
+            frac.get_den() = denom;
+            #else
+            boost::multiprecision::denominator(frac) = denom;
+            #endif
+        }
+            #if defined(GMP)
+        BigInt& getDenomUnsafe() {
+            return frac.get_den();
+            // #else
+            //             return boost::multiprecision::denominator(frac);
+        }
+            #endif
+
+            #if defined(GMP)
+        BigInt& getNumUnsafe() {
+            return frac.get_num();
+            // #else
+            //             return boost::multiprecision::numerator(frac);
+        }
+            #endif
+        >>>>>>> origin / main
     };
 
     inline PiRational operator-(const PiRational& rhs) {
