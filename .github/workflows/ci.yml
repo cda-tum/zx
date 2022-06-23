@@ -86,33 +86,6 @@ jobs:
                              ctest -C $BUILD_TYPE --output-on-failure
                            fi
 
-  test-gmp:
-    needs:   build
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ ubuntu-latest, macos-latest ]
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: recursive
-      - name: Install GMP
-        run:  |
-              if [ "$RUNNER_OS" == "Linux" ]; then
-                  sudo apt-get -y install libgmp-dev
-              else
-                  brew install gmp
-              fi
-
-      - name: Configure CMake
-        run:  cmake -S "${{github.workspace}}" -B "${{github.workspace}}/build" -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_ZX_TESTS=ON
-      - name: Build
-        run:  cmake --build "${{github.workspace}}/build" --config $BUILD_TYPE --target zx_test
-      - name:              Test
-        working-directory: ${{github.workspace}}/build/test
-        run:               ctest -C $BUILD_TYPE --output-on-failure
-
   coverage:
     needs:   test
     runs-on: ubuntu-latest
