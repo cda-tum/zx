@@ -2,8 +2,24 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstddef>
+#include <string>
 
 namespace zx {
+    std::unordered_map<std::string, std::size_t> Variable::registered = std::unordered_map<std::string, std::size_t>();
+    std::size_t                                  Variable::nextId;
+
+    Variable::Variable(std::string name) {
+        auto it = registered.find(name);
+        if (it != registered.end()) {
+            id = it->second;
+        } else {
+            registered[name] = nextId;
+            id               = nextId;
+            nextId++;
+        }
+    }
+
     void Term::addCoeff(fp r) {
         coeff += r;
     }

@@ -4,16 +4,18 @@
 #include "Rational.hpp"
 
 #include <cmath>
+#include <cstddef>
 #include <string>
 #include <utility>
 #include <vector>
 
 namespace zx {
     struct Variable {
-        Variable(std::int32_t id, std::string name):
-            id(id), name(std::move(name)){};
-        std::int32_t id;
-        std::string  name;
+        static std::unordered_map<std::string, std::size_t> registered;
+        static std::size_t                                  nextId;
+
+        explicit Variable(std::string name);
+        std::size_t id{};
     };
 
     inline bool operator==(const Variable& lhs, const Variable& rhs) {
@@ -29,9 +31,9 @@ namespace zx {
 
         void addCoeff(double r);
         Term(double coeff, Variable var):
-            coeff(coeff), var(std::move(var)){};
+            coeff(coeff), var(var){};
         explicit Term(Variable var):
-            coeff(1), var(std::move(var)){};
+            coeff(1), var(var){};
 
         Term  operator-() const { return Term(-coeff, var); }
         Term& operator*=(double rhs);
@@ -58,6 +60,7 @@ namespace zx {
         return rhs / lhs;
     }
 
+    template<class T>
     class Expression {
     public:
         using iterator       = std::vector<Term>::iterator;
@@ -73,16 +76,16 @@ namespace zx {
 
         template<typename... Args>
         explicit Expression(Variable v, Args... ms) {
-            terms.emplace_back(Term(1, std::move(v)));
+            terms.emplace_back(Term(1, v));
             (terms.emplace_back(std::forward<Args>(ms)), ...);
             sortTerms();
             aggregateEqualTerms();
         }
 
         Expression():
-            constant(PiRational(0, 1)){};
+            constant{0} {};
         explicit Expression(PiRational r):
-            constant(std::move(r)){};
+            constant{std::move(r)} {};
 
         iterator                     begin() { return terms.begin(); }
         iterator                     end() { return terms.end(); }
@@ -108,12 +111,12 @@ namespace zx {
         [[nodiscard]] Expression operator-() const;
 
         [[nodiscard]] const Term& operator[](std::size_t i) const { return terms[i]; }
-        [[nodiscard]] PiRational  getConst() const { return constant; }
+        [[nodiscard]] T           getConst() const { return constant; }
         [[nodiscard]] auto        numTerms() const { return terms.size(); }
 
     private:
         std::vector<Term> terms;
-        PiRational        constant;
+        T                 constant;
         void              sortTerms();
         void              aggregateEqualTerms();
     };
