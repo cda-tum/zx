@@ -1,5 +1,4 @@
 #include "Definitions.hpp"
-#include "Expression.hpp"
 #include "Rational.hpp"
 #include "Simplify.hpp"
 #include "ZXDiagram.hpp"
@@ -7,8 +6,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <gtest/gtest.h>
-
-using zx::Expression;
 
 class ZXDiagramTest: public ::testing::Test {
 public:
@@ -28,11 +25,11 @@ protected:
     virtual void SetUp() {
         diag = zx::ZXDiagram();
         diag.addQubits(2);
-        diag.addVertex(0, 0, zx::Expression(), zx::VertexType::Z);
+        diag.addVertex(0, 0, zx::PiExpression(), zx::VertexType::Z);
         diag.addEdge(0, 4, zx::EdgeType::Hadamard);
-        diag.addVertex(0, 0, zx::Expression(), zx::VertexType::Z);
+        diag.addVertex(0, 0, zx::PiExpression(), zx::VertexType::Z);
         diag.addEdge(4, 5);
-        diag.addVertex(0, 0, zx::Expression(), zx::VertexType::X);
+        diag.addVertex(0, 0, zx::PiExpression(), zx::VertexType::X);
         diag.addEdge(2, 6);
         diag.addEdge(5, 6);
         diag.addEdge(5, 1);
@@ -159,7 +156,7 @@ TEST_F(ZXDiagramTest, approximate) {
     zx::ZXDiagram almostId(3);
 
     almostId.removeEdge(0, 3);
-    auto v = almostId.addVertex(0, 1, zx::Expression(zx::PiRational(1e-8)));
+    auto v = almostId.addVertex(0, 1, zx::PiExpression(zx::PiRational(1e-8)));
     almostId.addEdge(0, v);
     almostId.addEdge(v, 3);
 
@@ -168,4 +165,30 @@ TEST_F(ZXDiagramTest, approximate) {
     almostId.approximateCliffords(1e-7);
 
     EXPECT_TRUE(almostId.phase(v).isZero());
+}
+
+TEST_F(ZXDiagramTest, ancilla) {
+    zx::ZXDiagram cx(2);
+    cx.removeEdge(0, 2);
+    cx.removeEdge(1, 3);
+    auto tar  = cx.addVertex(0, 0, zx::PiExpression{}, zx::VertexType::X);
+    auto ctrl = cx.addVertex(1);
+
+    cx.addEdge(tar, ctrl);
+    cx.addEdge(0, tar);
+    cx.addEdge(tar, 2);
+    cx.addEdge(1, ctrl);
+    cx.addEdge(ctrl, 3);
+    EXPECT_EQ(cx.getInputs().size(), 2);
+    EXPECT_EQ(cx.getOutputs().size(), 2);
+    EXPECT_EQ(cx.getNVertices(), 6);
+    cx.makeAncilla(1);
+    EXPECT_EQ(cx.getInputs().size(), 1);
+    EXPECT_EQ(cx.getOutputs().size(), 1);
+    EXPECT_EQ(cx.getNVertices(), 6);
+    std::cout << cx.getNEdges() << std::endl;
+    std::cout << cx.getNEdges() << std::endl;
+
+    EXPECT_EQ(cx.getNVertices(), 2);
+    EXPECT_TRUE(cx.isIdentity());
 }

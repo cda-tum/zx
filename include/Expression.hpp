@@ -1,21 +1,25 @@
 #pragma once
 
-#include "Definitions.hpp"
-#include "Rational.hpp"
-
+#include <algorithm>
 #include <cmath>
 #include <cstddef>
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
-namespace zx {
+namespace sym {
+    static constexpr double TOLERANCE = 1e-9;
+
     struct Variable {
         static std::unordered_map<std::string, std::size_t> registered;
+        static std::unordered_map<std::size_t, std::string> names;
         static std::size_t                                  nextId;
 
-        explicit Variable(std::string name);
+        explicit Variable(const std::string& name);
         std::size_t id{};
+
+        [[nodiscard]] std::string getName() const;
     };
 
     inline bool operator==(const Variable& lhs, const Variable& rhs) {
@@ -83,8 +87,8 @@ namespace zx {
         }
 
         Expression():
-            constant{0} {};
-        explicit Expression(PiRational r):
+            constant{0.0} {};
+        explicit Expression(T r):
             constant{std::move(r)} {};
 
         iterator                     begin() { return terms.begin(); }
@@ -94,75 +98,166 @@ namespace zx {
         [[nodiscard]] const_iterator cbegin() const { return terms.cbegin(); }
         [[nodiscard]] const_iterator cend() const { return terms.cend(); }
 
-        [[nodiscard]] bool isZero() const;
-        [[nodiscard]] bool isConstant() const;
-        [[nodiscard]] bool isPauli() const;
-        [[nodiscard]] bool isClifford() const;
-        [[nodiscard]] bool isProperClifford() const;
+        [[nodiscard]] bool isZero() const { return terms.empty() && constant == 0; }
+        [[nodiscard]] bool isConstant() const { return terms.empty(); }
+        // [[nodiscard]] bool isPauli() const;
+        // [[nodiscard]] bool isClifford() const;
+        // [[nodiscard]] bool isProperClifford() const;
 
-        void        roundToClifford(fp tolerance);
-        Expression& operator+=(const Expression& rhs);
-        Expression& operator+=(const Term& rhs);
-        Expression& operator+=(const PiRational& rhs);
+        // void        roundToClifford(fp tolerance);
+        Expression& operator+=(const Expression& rhs) {
+            if (this->isZero()) {
+                *this = rhs;
+                return *this;
+            }
 
-        Expression&              operator-=(const Expression& rhs);
-        Expression&              operator-=(const Term& rhs);
-        Expression&              operator-=(const PiRational& rhs);
-        [[nodiscard]] Expression operator-() const;
+            if (rhs.isZero())
+                return *this;
+
+            auto t = rhs.begin();
+
+            while (t != rhs.end()) {
+                auto insert_pos = std::lower_bound(
+                        terms.begin(), terms.end(), *t, [&](const Term& lhs, const Term& rhs) {
+                            return lhs.getVar().id < rhs.getVar().id;
+                        });
+                if (insert_pos != terms.end() && insert_pos->getVar() == t->getVar()) {
+                    if (insert_pos->getCoeff() == -t->getCoeff()) {
+                        terms.erase(insert_pos);
+                    } else {
+                        insert_pos->addCoeff(t->getCoeff());
+                    }
+                } else {
+                    terms.insert(insert_pos, *t);
+                }
+                ++t;
+            }
+            constant += rhs.constant;
+            return *this;
+        }
+
+        Expression& operator+=(const Term& rhs) {
+            return *this += Expression(rhs);
+        }
+
+        Expression& operator+=(const T& rhs) {
+            constant += rhs;
+            return *this;
+        }
+
+        Expression& operator-=(const Expression& rhs) {
+            return *this += -rhs;
+        }
+
+        Expression& operator-=(const Term& rhs) {
+            return *this += -rhs;
+        }
+        Expression& operator-=(const T& rhs) {
+            return *this += -rhs;
+        }
+
+        [[nodiscard]] Expression operator-() const {
+            Expression e;
+            e.terms.reserve(terms.size());
+            for (auto& t: terms)
+                e.terms.push_back(-t);
+            e.constant = -constant;
+            return e;
+        }
 
         [[nodiscard]] const Term& operator[](std::size_t i) const { return terms[i]; }
         [[nodiscard]] T           getConst() const { return constant; }
+        void                      setConst(const T& val) { constant = val; }
         [[nodiscard]] auto        numTerms() const { return terms.size(); }
 
     private:
         std::vector<Term> terms;
         T                 constant;
-        void              sortTerms();
-        void              aggregateEqualTerms();
+
+        void sortTerms() {
+            std::sort(terms.begin(), terms.end(), [&](const Term& lhs, const Term& rhs) {
+                return lhs.getVar().id < rhs.getVar().id;
+            });
+        }
+        void aggregateEqualTerms() {
+            for (auto t = terms.begin(); t != terms.end();) {
+                auto next = std::next(t);
+                while (next != terms.end() && t->getVar() == next->getVar()) {
+                    t->addCoeff(next->getCoeff());
+                    next = terms.erase(next);
+                }
+                if (t->hasZeroCoeff()) {
+                    t = terms.erase(t);
+                } else {
+                    t = next;
+                }
+            }
+        }
     };
 
-    inline Expression operator+(Expression lhs, const Expression& rhs) {
+    template<class T>
+    inline Expression<T> operator+(Expression<T> lhs, const Expression<T>& rhs) {
         lhs += rhs;
         return lhs;
     }
-    inline Expression operator+(Expression lhs, const Term& rhs) {
+
+    template<class T>
+    inline Expression<T> operator+(Expression<T> lhs, const Term& rhs) {
         lhs += rhs;
         return lhs;
     }
-    inline Expression operator+(Expression lhs, const PiRational& rhs) {
+
+    template<class T>
+    inline Expression<T> operator+(Expression<T> lhs, const T& rhs) {
         lhs += rhs;
         return lhs;
     }
-    inline Expression operator-(Expression lhs, const Expression& rhs) {
+    template<class T>
+    inline Expression<T> operator-(Expression<T> lhs, const Expression<T>& rhs) {
         lhs -= rhs;
         return lhs;
     }
-    inline Expression operator-(Expression lhs, const Term& rhs) {
+    template<class T>
+    inline Expression<T> operator-(Expression<T> lhs, const Term& rhs) {
         lhs -= rhs;
         return lhs;
     }
-    inline Expression operator-(Expression lhs, const PiRational& rhs) {
+    template<class T>
+    inline Expression<T> operator-(Expression<T> lhs, const T& rhs) {
         lhs -= rhs;
         return lhs;
     }
 
-    bool operator==(const Expression& lhs, const Expression& rhs);
-} // namespace zx
+    template<class T>
+    inline bool operator==(const Expression<T>& lhs, const Expression<T>& rhs) {
+        if (lhs.numTerms() != rhs.numTerms() || lhs.getConst() != rhs.getConst())
+            return false;
 
-inline std::ostream& operator<<(std::ostream& os, const zx::Variable& rhs) {
-    os << rhs.name;
-    return os;
-}
-
-inline std::ostream& operator<<(std::ostream& os, const zx::Term& rhs) {
-    os << rhs.getCoeff() << "*" << rhs.getVar();
-    return os;
-}
-
-inline std::ostream& operator<<(std::ostream& os, const zx::Expression& rhs) {
-    for (auto& t: rhs) {
-        os << t << " + ";
+        for (size_t i = 0; i < lhs.numTerms(); ++i) {
+            if (std::abs(lhs[i].getCoeff() - rhs[i].getCoeff()) >= TOLERANCE)
+                return false;
+        }
+        return true;
     }
-    os << rhs.getConst();
-    return os;
-}
+
+    inline std::ostream& operator<<(std::ostream& os, const Variable& rhs) {
+        os << rhs.getName();
+        return os;
+    }
+
+    inline std::ostream& operator<<(std::ostream& os, const Term& rhs) {
+        // os << rhs.getCoeff() << "*" << rhs.getVar();
+        os << rhs.getVar();
+        return os;
+    }
+
+    template<class T>
+    inline std::ostream& operator<<(std::ostream& os, const Expression<T>& rhs) {
+        for (auto& t: rhs) {
+            os << t << " + ";
+        }
+        os << rhs.getConst();
+        return os;
+    }
+
+} // namespace sym

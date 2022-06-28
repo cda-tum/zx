@@ -22,10 +22,10 @@ namespace zx {
     };
 
     struct VertexData {
-        Col        col;
-        Qubit      qubit;
-        Expression phase;
-        VertexType type;
+        Col          col;
+        Qubit        qubit;
+        PiExpression phase;
+        VertexType   type;
     };
 
     class Vertices {
@@ -131,4 +131,10 @@ namespace zx {
         std::vector<std::vector<Edge>>&         edges;
         std::vector<std::optional<VertexData>>& vertices;
     };
+
+    bool isPauli(const PiExpression& expr);
+    bool isClifford(const PiExpression& expr);
+    bool isProperClifford(const PiExpression& expr);
+
+    void roundToClifford(PiExpression& expr, fp tolerance);
 } // namespace zx

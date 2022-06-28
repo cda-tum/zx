@@ -34,8 +34,8 @@ namespace zx {
 
         Vertex addVertex(const VertexData& data);
         Vertex addVertex(Qubit qubit, Col col = 0,
-                         const Expression& phase = Expression(),
-                         VertexType        type  = VertexType::Z);
+                         const PiExpression& phase = PiExpression(),
+                         VertexType          type  = VertexType::Z);
         void   addQubit();
         void   addQubits(zx::Qubit n);
         void   removeVertex(Vertex to_remove);
@@ -53,7 +53,7 @@ namespace zx {
 
         [[nodiscard]] std::size_t degree(Vertex v) const { return edges[v].size(); }
 
-        [[nodiscard]] const Expression& phase(Vertex v) const {
+        [[nodiscard]] const PiExpression& phase(Vertex v) const {
             return vertices[v].value().phase;
         }
 
@@ -91,11 +91,11 @@ namespace zx {
         [[nodiscard]] bool isInput(Vertex v) const;
         [[nodiscard]] bool isOutput(Vertex v) const;
 
-        void addPhase(Vertex v, const Expression& phase) {
+        void addPhase(Vertex v, const PiExpression& phase) {
             vertices[v].value().phase += phase;
         }
 
-        void setPhase(Vertex v, const Expression& phase) {
+        void setPhase(Vertex v, const PiExpression& phase) {
             vertices[v].value().phase = phase;
         }
 

@@ -74,7 +74,7 @@ TEST_F(SimplifyTest, spider_fusion) {
     zx::ZXDiagram diag     = make_identity_diagram(nqubits, nspiders);
 
     for (zx::Vertex v = 2; v < diag.getNVertices(); v++)
-        diag.addPhase(v, zx::Expression(zx::PiRational(1, 1)));
+        diag.addPhase(v, zx::PiExpression(zx::PiRational(1, 1)));
 
     std::size_t removed = zx::spiderSimp(diag);
 
@@ -125,11 +125,11 @@ TEST_F(SimplifyTest, localComp) {
     diag.removeEdge(0, 2);
     diag.removeEdge(1, 3);
 
-    diag.addVertex(0, 0, zx::Expression(zx::PiRational(1, 2)), zx::VertexType::Z); // 4
-    diag.addVertex(0, 0, zx::Expression(zx::PiRational(0, 1)), zx::VertexType::Z); // 5
-    diag.addVertex(0, 0, zx::Expression(zx::PiRational(0, 1)), zx::VertexType::Z); // 6
-    diag.addVertex(0, 0, zx::Expression(zx::PiRational(0, 1)), zx::VertexType::Z); // 7
-    diag.addVertex(0, 0, zx::Expression(zx::PiRational(0, 1)), zx::VertexType::Z); // 8
+    diag.addVertex(0, 0, zx::PiExpression(zx::PiRational(1, 2)), zx::VertexType::Z); // 4
+    diag.addVertex(0, 0, zx::PiExpression(zx::PiRational(0, 1)), zx::VertexType::Z); // 5
+    diag.addVertex(0, 0, zx::PiExpression(zx::PiRational(0, 1)), zx::VertexType::Z); // 6
+    diag.addVertex(0, 0, zx::PiExpression(zx::PiRational(0, 1)), zx::VertexType::Z); // 7
+    diag.addVertex(0, 0, zx::PiExpression(zx::PiRational(0, 1)), zx::VertexType::Z); // 8
 
     diag.addEdge(4, 5, zx::EdgeType::Hadamard);
     diag.addEdge(4, 6, zx::EdgeType::Hadamard);
@@ -146,7 +146,7 @@ TEST_F(SimplifyTest, localComp) {
     EXPECT_EQ(removed, 1);
 
     for (zx::Vertex v = 5; v <= 8; v++) {
-        EXPECT_TRUE(diag.phase(v) == zx::Expression(zx::Expression(zx::PiRational(-1, 2))));
+        EXPECT_TRUE(diag.phase(v) == zx::PiExpression(zx::PiExpression(zx::PiRational(-1, 2))));
         for (zx::Vertex w = 5; w <= 8; w++) {
             if (w != v) {
                 ASSERT_TRUE(diag.connected(v, w));
@@ -163,13 +163,13 @@ TEST_F(SimplifyTest, pivotPauli) {
     diag.removeEdge(0, 2);
     diag.removeEdge(1, 3);
 
-    diag.addVertex(0, 0, zx::Expression(zx::PiRational(1, 1)), zx::VertexType::Z); // 4
-    diag.addVertex(0, 0, zx::Expression(zx::PiRational(0, 1)), zx::VertexType::Z); // 5
-    diag.addVertex(0, 0, zx::Expression(zx::PiRational(0, 1)), zx::VertexType::Z); // 6
-    diag.addVertex(1, 0, zx::Expression(zx::PiRational(0, 1)), zx::VertexType::Z); // 7
-    diag.addVertex(0, 0, zx::Expression(zx::PiRational(0, 1)), zx::VertexType::Z); // 8
-    diag.addVertex(1, 0, zx::Expression(zx::PiRational(0, 1)), zx::VertexType::Z); // 9
-    diag.addVertex(1, 0, zx::Expression(zx::PiRational(0, 1)), zx::VertexType::Z); // 10
+    diag.addVertex(0, 0, zx::PiExpression(zx::PiRational(1, 1)), zx::VertexType::Z); // 4
+    diag.addVertex(0, 0, zx::PiExpression(zx::PiRational(0, 1)), zx::VertexType::Z); // 5
+    diag.addVertex(0, 0, zx::PiExpression(zx::PiRational(0, 1)), zx::VertexType::Z); // 6
+    diag.addVertex(1, 0, zx::PiExpression(zx::PiRational(0, 1)), zx::VertexType::Z); // 7
+    diag.addVertex(0, 0, zx::PiExpression(zx::PiRational(0, 1)), zx::VertexType::Z); // 8
+    diag.addVertex(1, 0, zx::PiExpression(zx::PiRational(0, 1)), zx::VertexType::Z); // 9
+    diag.addVertex(1, 0, zx::PiExpression(zx::PiRational(0, 1)), zx::VertexType::Z); // 10
 
     // IO-Edges
     diag.addEdge(0, 6);
@@ -190,11 +190,11 @@ TEST_F(SimplifyTest, pivotPauli) {
     EXPECT_EQ(removed, 1);
     EXPECT_EQ(diag.getNEdges(), 12);
     EXPECT_EQ(diag.getNVertices(), 9);
-    EXPECT_TRUE(diag.phase(8) == zx::Expression(zx::Expression(zx::PiRational(1, 1))));
-    EXPECT_TRUE(diag.phase(9) == zx::Expression(zx::PiRational(1, 1)));
-    EXPECT_TRUE(diag.phase(10) == zx::Expression(zx::PiRational(0, 1)));
-    EXPECT_TRUE(diag.phase(6) == zx::Expression(zx::PiRational(0, 1)));
-    EXPECT_TRUE(diag.phase(7) == zx::Expression(zx::PiRational(0, 1)));
+    EXPECT_TRUE(diag.phase(8) == zx::PiExpression(zx::PiExpression(zx::PiRational(1, 1))));
+    EXPECT_TRUE(diag.phase(9) == zx::PiExpression(zx::PiRational(1, 1)));
+    EXPECT_TRUE(diag.phase(10) == zx::PiExpression(zx::PiRational(0, 1)));
+    EXPECT_TRUE(diag.phase(6) == zx::PiExpression(zx::PiRational(0, 1)));
+    EXPECT_TRUE(diag.phase(7) == zx::PiExpression(zx::PiRational(0, 1)));
 }
 
 TEST_F(SimplifyTest, interior_clifford) {
@@ -215,9 +215,9 @@ TEST_F(SimplifyTest, interior_clifford_2) {
     zx::ZXDiagram diag(1);
     diag.removeEdge(0, 1);
 
-    diag.addVertex(0, 0, zx::Expression(zx::PiRational(-1, 2)), zx::VertexType::X); // 2
-    diag.addVertex(0, 0, zx::Expression(zx::PiRational(1, 2)), zx::VertexType::Z);  // 3
-    diag.addVertex(0, 0, zx::Expression(zx::PiRational(-1, 2)), zx::VertexType::X); // 4
+    diag.addVertex(0, 0, zx::PiExpression(zx::PiRational(-1, 2)), zx::VertexType::X); // 2
+    diag.addVertex(0, 0, zx::PiExpression(zx::PiRational(1, 2)), zx::VertexType::Z);  // 3
+    diag.addVertex(0, 0, zx::PiExpression(zx::PiRational(-1, 2)), zx::VertexType::X); // 4
 
     diag.addEdge(2, 3);
     diag.addEdge(3, 4);
@@ -240,9 +240,9 @@ TEST_F(SimplifyTest, non_pauli_pivot) {
     zx::ZXDiagram diag(1);
     diag.removeEdge(0, 1);
 
-    diag.addVertex(0, 0, zx::Expression(zx::PiRational(1, 4))); // 2
-    diag.addVertex(0);                                          // 3
-    diag.addVertex(0);                                          // 4
+    diag.addVertex(0, 0, zx::PiExpression(zx::PiRational(1, 4))); // 2
+    diag.addVertex(0);                                            // 3
+    diag.addVertex(0);                                            // 4
 
     diag.addEdge(0, 2);
     diag.addEdge(2, 3, zx::EdgeType::Hadamard);
@@ -326,12 +326,12 @@ TEST_F(SimplifyTest, non_pauli_pivot) {
 TEST_F(SimplifyTest, gadgetSimp) {
     zx::ZXDiagram diag = make_empty_diagram(1);
 
-    diag.addVertex(0);                                          // 2
-    diag.addVertex(0);                                          // 3
-    diag.addVertex(0);                                          // 4
-    diag.addVertex(0, 0, zx::Expression(zx::PiRational(1, 1))); // 5
-    diag.addVertex(0);                                          // 6
-    diag.addVertex(0, 0, zx::Expression(zx::PiRational(1, 1))); // 7
+    diag.addVertex(0);                                            // 2
+    diag.addVertex(0);                                            // 3
+    diag.addVertex(0);                                            // 4
+    diag.addVertex(0, 0, zx::PiExpression(zx::PiRational(1, 1))); // 5
+    diag.addVertex(0);                                            // 6
+    diag.addVertex(0, 0, zx::PiExpression(zx::PiRational(1, 1))); // 7
 
     diag.addEdge(0, 2);
     diag.addEdge(3, 1);
@@ -356,11 +356,11 @@ TEST_F(SimplifyTest, gadgetSimp) {
 
 TEST_F(SimplifyTest, gadgetSimp_2) {
     zx::ZXDiagram diag = make_empty_diagram(1);
-    diag.addVertex(0);                                          // 2
-    diag.addVertex(0);                                          // 3
-    diag.addVertex(0, 0, zx::Expression(zx::PiRational(1, 1))); // 4
-    diag.addVertex(0);                                          // 5
-    diag.addVertex(0, 0, zx::Expression(zx::PiRational(1, 1))); // 6
+    diag.addVertex(0);                                            // 2
+    diag.addVertex(0);                                            // 3
+    diag.addVertex(0, 0, zx::PiExpression(zx::PiRational(1, 1))); // 4
+    diag.addVertex(0);                                            // 5
+    diag.addVertex(0, 0, zx::PiExpression(zx::PiRational(1, 1))); // 6
 
     diag.addEdge(0, 2);
     diag.addEdge(2, 1);
@@ -390,12 +390,12 @@ TEST_F(SimplifyTest, gadgetSimp_2) {
 TEST_F(SimplifyTest, fullReduce_2) {
     zx::ZXDiagram diag = make_empty_diagram(2);
 
-    diag.addVertex(0, 0, zx::Expression(zx::PiRational(1, 32)), zx::VertexType::X);  // 4
-    diag.addVertex(0, 0, zx::Expression(zx::PiRational(0, 1)), zx::VertexType::Z);   // 5
-    diag.addVertex(1, 0, zx::Expression(zx::PiRational(0, 1)), zx::VertexType::X);   // 6
-    diag.addVertex(0, 0, zx::Expression(zx::PiRational(0, 1)), zx::VertexType::Z);   // 7
-    diag.addVertex(1, 0, zx::Expression(zx::PiRational(0, 1)), zx::VertexType::X);   // 8
-    diag.addVertex(0, 0, zx::Expression(zx::PiRational(-1, 32)), zx::VertexType::X); // 9
+    diag.addVertex(0, 0, zx::PiExpression(zx::PiRational(1, 32)), zx::VertexType::X);  // 4
+    diag.addVertex(0, 0, zx::PiExpression(zx::PiRational(0, 1)), zx::VertexType::Z);   // 5
+    diag.addVertex(1, 0, zx::PiExpression(zx::PiRational(0, 1)), zx::VertexType::X);   // 6
+    diag.addVertex(0, 0, zx::PiExpression(zx::PiRational(0, 1)), zx::VertexType::Z);   // 7
+    diag.addVertex(1, 0, zx::PiExpression(zx::PiRational(0, 1)), zx::VertexType::X);   // 8
+    diag.addVertex(0, 0, zx::PiExpression(zx::PiRational(-1, 32)), zx::VertexType::X); // 9
 
     diag.addEdge(0, 4);
     diag.addEdge(4, 5);
@@ -415,12 +415,12 @@ TEST_F(SimplifyTest, fullReduce_2) {
 TEST_F(SimplifyTest, fullReduceApprox) {
     zx::ZXDiagram diag = make_empty_diagram(2);
 
-    diag.addVertex(0, 0, zx::Expression(zx::PiRational(1, 32)), zx::VertexType::X);  // 4
-    diag.addVertex(0, 0, zx::Expression(zx::PiRational(0, 1)), zx::VertexType::Z);   // 5
-    diag.addVertex(1, 0, zx::Expression(zx::PiRational(1e-8)), zx::VertexType::X);   // 6
-    diag.addVertex(0, 0, zx::Expression(zx::PiRational(0, 1)), zx::VertexType::Z);   // 7
-    diag.addVertex(1, 0, zx::Expression(zx::PiRational(0, 1)), zx::VertexType::X);   // 8
-    diag.addVertex(0, 0, zx::Expression(zx::PiRational(-1, 32)), zx::VertexType::X); // 9
+    diag.addVertex(0, 0, zx::PiExpression(zx::PiRational(1, 32)), zx::VertexType::X);  // 4
+    diag.addVertex(0, 0, zx::PiExpression(zx::PiRational(0, 1)), zx::VertexType::Z);   // 5
+    diag.addVertex(1, 0, zx::PiExpression(zx::PiRational(1e-8)), zx::VertexType::X);   // 6
+    diag.addVertex(0, 0, zx::PiExpression(zx::PiRational(0, 1)), zx::VertexType::Z);   // 7
+    diag.addVertex(1, 0, zx::PiExpression(zx::PiRational(0, 1)), zx::VertexType::X);   // 8
+    diag.addVertex(0, 0, zx::PiExpression(zx::PiRational(-1, 32)), zx::VertexType::X); // 9
 
     diag.addEdge(0, 4);
     diag.addEdge(4, 5);
@@ -440,12 +440,12 @@ TEST_F(SimplifyTest, fullReduceApprox) {
 TEST_F(SimplifyTest, fullReduceNotApprox) {
     zx::ZXDiagram diag = make_empty_diagram(2);
 
-    diag.addVertex(0, 0, zx::Expression(zx::PiRational(1, 32)), zx::VertexType::X);  // 4
-    diag.addVertex(0, 0, zx::Expression(zx::PiRational(0, 1)), zx::VertexType::Z);   // 5
-    diag.addVertex(1, 0, zx::Expression(zx::PiRational(1e-8)), zx::VertexType::X);   // 6
-    diag.addVertex(0, 0, zx::Expression(zx::PiRational(0, 1)), zx::VertexType::Z);   // 7
-    diag.addVertex(1, 0, zx::Expression(zx::PiRational(0, 1)), zx::VertexType::X);   // 8
-    diag.addVertex(0, 0, zx::Expression(zx::PiRational(-1, 32)), zx::VertexType::X); // 9
+    diag.addVertex(0, 0, zx::PiExpression(zx::PiRational(1, 32)), zx::VertexType::X);  // 4
+    diag.addVertex(0, 0, zx::PiExpression(zx::PiRational(0, 1)), zx::VertexType::Z);   // 5
+    diag.addVertex(1, 0, zx::PiExpression(zx::PiRational(1e-8)), zx::VertexType::X);   // 6
+    diag.addVertex(0, 0, zx::PiExpression(zx::PiRational(0, 1)), zx::VertexType::Z);   // 7
+    diag.addVertex(1, 0, zx::PiExpression(zx::PiRational(0, 1)), zx::VertexType::X);   // 8
+    diag.addVertex(0, 0, zx::PiExpression(zx::PiRational(-1, 32)), zx::VertexType::X); // 9
 
     diag.addEdge(0, 4);
     diag.addEdge(4, 5);
@@ -463,14 +463,14 @@ TEST_F(SimplifyTest, fullReduceNotApprox) {
 }
 
 TEST_F(SimplifyTest, idSymbolic) {
-    zx::Term x{zx::Variable(0, "x")};
-    zx::Term y{zx::Variable(1, "y")};
-    zx::Term z{zx::Variable(2, "z")};
+    sym::Term x{sym::Variable("x")};
+    sym::Term y{sym::Variable("y")};
+    sym::Term z{sym::Variable("z")};
 
     std::size_t nqubits = 50;
 
-    zx::ZXDiagram  diag = make_identity_diagram(nqubits, 100);
-    zx::Expression e;
+    zx::ZXDiagram    diag = make_identity_diagram(nqubits, 100);
+    zx::PiExpression e;
     e += x;
     diag.setPhase(nqubits * 2 + 5, e);
     EXPECT_EQ(e.numTerms(), 1);
@@ -483,42 +483,42 @@ TEST_F(SimplifyTest, idSymbolic) {
 }
 
 TEST_F(SimplifyTest, equivalenceSymbolic) {
-    zx::Term      x{zx::Variable(0, "x")};
-    zx::Term      y{zx::Variable(1, "y")};
-    zx::Term      z{zx::Variable(2, "z")};
+    sym::Term     x{sym::Variable("x")};
+    sym::Term     y{sym::Variable("y")};
+    sym::Term     z{sym::Variable("z")};
     zx::ZXDiagram d1 = make_empty_diagram(3);
 
     // first circuit
     d1.addVertex(0, 0); // 6
     d1.addHadamardEdge(0, 6);
 
-    d1.addVertex(0, 0);                                      // 7
-    d1.addVertex(1, 0, zx::Expression(), zx::VertexType::X); // 8
+    d1.addVertex(0, 0);                                        // 7
+    d1.addVertex(1, 0, zx::PiExpression(), zx::VertexType::X); // 8
     d1.addEdge(7, 8);
     d1.addEdge(6, 7);
     d1.addEdge(1, 8);
 
-    d1.addVertex(0, 0);                                      // 9
-    d1.addVertex(2, 0, zx::Expression(), zx::VertexType::X); // 10
+    d1.addVertex(0, 0);                                        // 9
+    d1.addVertex(2, 0, zx::PiExpression(), zx::VertexType::X); // 10
     d1.addEdge(9, 10);
     d1.addEdge(7, 9);
     d1.addEdge(2, 10);
 
-    d1.addVertex(0, 0, zx::Expression(x), zx::VertexType::Z); // 11
-    d1.addVertex(1, 0, zx::Expression(y), zx::VertexType::X); // 12
-    d1.addVertex(2, 0, zx::Expression(z), zx::VertexType::X); // 13
+    d1.addVertex(0, 0, zx::PiExpression(x), zx::VertexType::Z); // 11
+    d1.addVertex(1, 0, zx::PiExpression(y), zx::VertexType::X); // 12
+    d1.addVertex(2, 0, zx::PiExpression(z), zx::VertexType::X); // 13
     d1.addEdge(9, 11);
     d1.addEdge(8, 12);
     d1.addEdge(10, 13);
 
-    d1.addVertex(0, 0);                                      // 14
-    d1.addVertex(1, 0, zx::Expression(), zx::VertexType::X); // 15
+    d1.addVertex(0, 0);                                        // 14
+    d1.addVertex(1, 0, zx::PiExpression(), zx::VertexType::X); // 15
     d1.addEdge(14, 15);
     d1.addEdge(11, 14);
     d1.addEdge(12, 15);
 
-    d1.addVertex(0, 0);                                      // 16
-    d1.addVertex(2, 0, zx::Expression(), zx::VertexType::X); // 17
+    d1.addVertex(0, 0);                                        // 16
+    d1.addVertex(2, 0, zx::PiExpression(), zx::VertexType::X); // 17
     d1.addEdge(16, 17);
     d1.addEdge(14, 16);
     d1.addEdge(13, 17);
@@ -530,33 +530,33 @@ TEST_F(SimplifyTest, equivalenceSymbolic) {
     d1.addVertex(0, 0); // 19
     d1.addHadamardEdge(18, 19);
 
-    d1.addVertex(0, 0);                                      // 20
-    d1.addVertex(1, 0, zx::Expression(), zx::VertexType::X); // 21
+    d1.addVertex(0, 0);                                        // 20
+    d1.addVertex(1, 0, zx::PiExpression(), zx::VertexType::X); // 21
     d1.addEdge(20, 21);
     d1.addEdge(19, 20);
     d1.addEdge(17, 21);
 
-    d1.addVertex(0, 0);                                      // 22
-    d1.addVertex(1, 0, zx::Expression(), zx::VertexType::X); // 23
+    d1.addVertex(0, 0);                                        // 22
+    d1.addVertex(1, 0, zx::PiExpression(), zx::VertexType::X); // 23
     d1.addEdge(22, 23);
     d1.addEdge(20, 22);
     d1.addEdge(15, 23);
 
-    d1.addVertex(0, 0, -zx::Expression(x), zx::VertexType::Z); // 24
-    d1.addVertex(1, 0, -zx::Expression(y), zx::VertexType::X); // 25
-    d1.addVertex(2, 0, -zx::Expression(z), zx::VertexType::X); // 26
+    d1.addVertex(0, 0, -zx::PiExpression(x), zx::VertexType::Z); // 24
+    d1.addVertex(1, 0, -zx::PiExpression(y), zx::VertexType::X); // 25
+    d1.addVertex(2, 0, -zx::PiExpression(z), zx::VertexType::X); // 26
     d1.addEdge(22, 24);
     d1.addEdge(23, 25);
     d1.addEdge(21, 26);
 
-    d1.addVertex(0, 0);                                      // 27
-    d1.addVertex(1, 0, zx::Expression(), zx::VertexType::X); // 28
+    d1.addVertex(0, 0);                                        // 27
+    d1.addVertex(1, 0, zx::PiExpression(), zx::VertexType::X); // 28
     d1.addEdge(24, 27);
     d1.addEdge(26, 28);
     d1.addEdge(28, 27);
 
-    d1.addVertex(0, 0);                                      // 29
-    d1.addVertex(1, 0, zx::Expression(), zx::VertexType::X); // 30
+    d1.addVertex(0, 0);                                        // 29
+    d1.addVertex(1, 0, zx::PiExpression(), zx::VertexType::X); // 30
     d1.addEdge(29, 30);
     d1.addEdge(27, 29);
     d1.addEdge(25, 30);

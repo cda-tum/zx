@@ -117,4 +117,29 @@ namespace zx {
     bool operator!=(const Edges::EdgeIterator& a, const Edges::EdgeIterator& b) {
         return !(a == b);
     }
+
+    bool isPauli(const PiExpression& expr) {
+        return expr.isConstant() && expr.getConst().isInteger();
+    }
+    bool isClifford(const PiExpression& expr) {
+        return expr.isConstant() && (expr.getConst().isInteger() || expr.getConst().getDenom() == 2);
+    }
+    bool isProperClifford(const PiExpression& expr) {
+        return expr.isConstant() && expr.getConst().getDenom() == 2;
+    }
+
+    void roundToClifford(PiExpression& expr, fp tolerance) {
+        if (!expr.isConstant())
+            return;
+
+        if (expr.getConst().isCloseDivPi(0, tolerance)) {
+            expr.setConst(PiRational(0, 1));
+        } else if (expr.getConst().isCloseDivPi(0.5, tolerance)) {
+            expr.setConst(PiRational(1, 2));
+        } else if (expr.getConst().isCloseDivPi(-0.5, tolerance)) {
+            expr.setConst(PiRational(-1, 2));
+        } else if (expr.getConst().isCloseDivPi(1, tolerance)) {
+            expr.setConst(PiRational(1, 1));
+        }
+    }
 } // namespace zx
