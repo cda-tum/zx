@@ -100,11 +100,7 @@ namespace sym {
 
         [[nodiscard]] bool isZero() const { return terms.empty() && constant == 0; }
         [[nodiscard]] bool isConstant() const { return terms.empty(); }
-        // [[nodiscard]] bool isPauli() const;
-        // [[nodiscard]] bool isClifford() const;
-        // [[nodiscard]] bool isProperClifford() const;
 
-        // void        roundToClifford(fp tolerance);
         Expression& operator+=(const Expression& rhs) {
             if (this->isZero()) {
                 *this = rhs;
@@ -154,6 +150,22 @@ namespace sym {
         }
         Expression& operator-=(const T& rhs) {
             return *this += -rhs;
+        }
+
+        Expression& multTerms(double x) {
+            std::for_each(terms.begin(), terms.end(), [&](auto& term) { term *= x; });
+        }
+
+        Expression& multConst(const T& x) {
+            constant *= x;
+        }
+
+        Expression& divTerms(double x) {
+            std::for_each(terms.begin(), terms.end(), [&](auto& term) { term /= x; });
+        }
+
+        Expression& divConst(const T& x) {
+            constant /= x;
         }
 
         [[nodiscard]] Expression operator-() const {
