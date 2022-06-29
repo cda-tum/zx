@@ -350,25 +350,25 @@ namespace sym {
         return true;
     }
 
-    inline std::ostream& operator<<(std::ostream& os, const Variable& rhs) {
-        os << rhs.getName();
-        return os;
-    }
+    // inline std::ostream& operator<<(std::ostream& os, const Variable& rhs) {
+    //     os << rhs.getName();
+    //     return os;
+    // }
 
-    template<typename T>
-    inline std::ostream& operator<<(std::ostream& os, const Term<T>& rhs) {
-        // os << rhs.getCoeff() << "*" << rhs.getVar();
-        os << rhs.getVar();
-        return os;
-    }
+    // template<typename T>
+    // inline std::ostream& operator<<(std::ostream& os, const Term<T>& rhs) {
+    //     // os << rhs.getCoeff() << "*" << rhs.getVar();
+    //     os << rhs.getVar();
+    //     return os;
+    // }
 
-    template<typename T, typename U>
-    inline std::ostream& operator<<(std::ostream& os, const Expression<T, U>& rhs) {
-        for (auto& t: rhs) {
-            os << t << " + ";
-        }
-        os << rhs.getConst();
-        return os;
-    }
+    // template<typename T, typename U>
+    // inline std::ostream& operator<<(std::ostream& os, const Expression<T, U>& rhs) {
+    //     for (auto& t: rhs) {
+    //         os << t << " + ";
+    //     }
+    //     os << rhs.getConst();
+    //     return os;
+    // }
 
 } // namespace sym
