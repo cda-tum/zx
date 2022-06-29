@@ -115,8 +115,11 @@ namespace zx {
         ZXDiagram& operator+=(const ZXDiagram& rhs) { return this->concat(rhs); }
 
         void makeAncilla(Qubit qubit);
+        void makeAncilla(Qubit in, Qubit out);
 
         void approximateCliffords(fp tolerance);
+
+        void removeDisconnectedSpiders();
 
     private:
         std::vector<std::vector<Edge>>         edges;

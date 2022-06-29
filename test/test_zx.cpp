@@ -113,21 +113,21 @@ TEST_F(ZXDiagramTest, graph_like) {
 //     EXPECT_EQ(diag.getEdge(2, 6).value().type, zx::EdgeType::Simple);
 //     EXPECT_EQ(diag.getEdge(3, 6).value().type, zx::EdgeType::Simple);
 //     EXPECT_EQ(diag.getEdge(5, 9).value().type, zx::EdgeType::Hadamard);
-//     // EXPECT_EQ(diag.getEdge(4, 9).value().type, zx::EdgeType::Simple);
-//     // EXPECT_EQ(diag.getEdge(7, 8).value().type, zx::EdgeType::Simple);
-//     // EXPECT_EQ(diag.getEdge(8, 10).value().type, zx::EdgeType::Simple);
-//     // EXPECT_EQ(diag.getEdge(9, 11).value().type, zx::EdgeType::Simple);
+//     EXPECT_EQ(diag.getEdge(4, 9).value().type, zx::EdgeType::Simple);
+//     EXPECT_EQ(diag.getEdge(7, 8).value().type, zx::EdgeType::Simple);
+//     EXPECT_EQ(diag.getEdge(8, 10).value().type, zx::EdgeType::Simple);
+//     EXPECT_EQ(diag.getEdge(9, 11).value().type, zx::EdgeType::Simple);
 
-//     // EXPECT_EQ(diag.getVData(0).value().type, zx::VertexType::Boundary);
-//     // EXPECT_EQ(diag.getVData(1).value().type, zx::VertexType::Boundary);
-//     // EXPECT_EQ(diag.getVData(2).value().type, zx::VertexType::Z);
-//     // EXPECT_EQ(diag.getVData(3).value().type, zx::VertexType::Z);
-//     // EXPECT_EQ(diag.getVData(4).value().type, zx::VertexType::X);
-//     // EXPECT_EQ(diag.getVData(7).value().type, zx::VertexType::Z);
-//     // EXPECT_EQ(diag.getVData(8).value().type, zx::VertexType::Z);
-//     // EXPECT_EQ(diag.getVData(9).value().type, zx::VertexType::X);
-//     // EXPECT_EQ(diag.getVData(10).value().type, zx::VertexType::Boundary);
-//     // EXPECT_EQ(diag.getVData(11).value().type, zx::VertexType::Boundary);
+//     EXPECT_EQ(diag.getVData(0).value().type, zx::VertexType::Boundary);
+//     EXPECT_EQ(diag.getVData(1).value().type, zx::VertexType::Boundary);
+//     EXPECT_EQ(diag.getVData(2).value().type, zx::VertexType::Z);
+//     EXPECT_EQ(diag.getVData(3).value().type, zx::VertexType::Z);
+//     EXPECT_EQ(diag.getVData(4).value().type, zx::VertexType::X);
+//     EXPECT_EQ(diag.getVData(7).value().type, zx::VertexType::Z);
+//     EXPECT_EQ(diag.getVData(8).value().type, zx::VertexType::Z);
+//     EXPECT_EQ(diag.getVData(9).value().type, zx::VertexType::X);
+//     EXPECT_EQ(diag.getVData(10).value().type, zx::VertexType::Boundary);
+//     EXPECT_EQ(diag.getVData(11).value().type, zx::VertexType::Boundary);
 
 //     EXPECT_TRUE(diag.isDeleted(1));
 //     EXPECT_TRUE(diag.isDeleted(3));
@@ -171,7 +171,8 @@ TEST_F(ZXDiagramTest, ancilla) {
     zx::ZXDiagram cx(2);
     cx.removeEdge(0, 2);
     cx.removeEdge(1, 3);
-    auto tar  = cx.addVertex(0, 0, zx::PiExpression{}, zx::VertexType::X);
+    auto tar = cx.addVertex(0, 0, zx::PiExpression{}, zx::VertexType::X);
+
     auto ctrl = cx.addVertex(1);
 
     cx.addEdge(tar, ctrl);
@@ -182,13 +183,33 @@ TEST_F(ZXDiagramTest, ancilla) {
     EXPECT_EQ(cx.getInputs().size(), 2);
     EXPECT_EQ(cx.getOutputs().size(), 2);
     EXPECT_EQ(cx.getNVertices(), 6);
+
     cx.makeAncilla(1);
     EXPECT_EQ(cx.getInputs().size(), 1);
     EXPECT_EQ(cx.getOutputs().size(), 1);
     EXPECT_EQ(cx.getNVertices(), 6);
-    std::cout << cx.getNEdges() << std::endl;
-    std::cout << cx.getNEdges() << std::endl;
 
+    zx::fullReduce(cx);
+
+    EXPECT_EQ(cx.getNEdges(), 1);
+    for (auto [v, data]: cx.getVertices()) {
+        std::cout << v << " " << (data.type == zx::VertexType::Boundary) << std::endl;
+    }
     EXPECT_EQ(cx.getNVertices(), 2);
     EXPECT_TRUE(cx.isIdentity());
+}
+
+TEST_F(ZXDiagramTest, RemoveScalarSubDiagram) {
+    zx::ZXDiagram idWithScal(1);
+
+    auto v = idWithScal.addVertex(1);
+    auto w = idWithScal.addVertex(2);
+    idWithScal.addEdge(v, w);
+
+    zx::fullReduce(idWithScal);
+
+    EXPECT_EQ(idWithScal.getNVertices(), 2);
+    EXPECT_EQ(idWithScal.getNEdges(), 1);
+    EXPECT_TRUE(idWithScal.isDeleted(v));
+    EXPECT_TRUE(idWithScal.isDeleted(w));
 }

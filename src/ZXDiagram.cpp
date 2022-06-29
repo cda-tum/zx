@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -296,15 +297,17 @@ namespace zx {
     }
 
     void ZXDiagram::makeAncilla(Qubit qubit) {
-        auto in_v  = inputs[qubit];
-        auto out_v = outputs[qubit];
-        inputs.erase(inputs.begin() + qubit);
-        outputs.erase(outputs.begin() + qubit);
+        makeAncilla(qubit, qubit);
+    }
+
+    void ZXDiagram::makeAncilla(Qubit in, Qubit out) {
+        auto in_v  = inputs[in];
+        auto out_v = outputs[out];
+        inputs.erase(inputs.begin() + in);
+        outputs.erase(outputs.begin() + out);
 
         setType(in_v, VertexType::X);
         setType(out_v, VertexType::X);
-        // removeVertex(in_v);
-        // removeVertex(out_v);
     }
 
     void ZXDiagram::approximateCliffords(fp tolerance) {
@@ -314,4 +317,33 @@ namespace zx {
             }
         }
     }
+
+    void ZXDiagram::removeDisconnectedSpiders() {
+        auto connectedToBoundary = [&](Vertex v) {
+            std::unordered_set<Vertex> visited{};
+            std::vector<Vertex>        stack{};
+            stack.push_back(v);
+
+            while (!stack.empty()) {
+                auto w = stack.back();
+                stack.pop_back();
+
+                if (visited.find(w) != visited.end())
+                    continue;
+
+                if (isInput(w) || isOutput(w))
+                    return true;
+
+                for (auto [to, _]: incidentEdges(w))
+                    stack.push_back(to);
+            }
+            return false;
+        };
+
+        for (Vertex v = 0; v < vertices.size(); ++v) {
+            if (!isDeleted(v) && !connectedToBoundary(v))
+                removeVertex(v);
+        }
+    }
+
 } // namespace zx
