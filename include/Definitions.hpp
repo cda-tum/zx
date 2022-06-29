@@ -23,7 +23,7 @@ namespace zx {
     static constexpr double PI =
             3.141592653589793238462643383279502884197169399375105820974L;
 
-    using PiExpression = sym::Expression<PiRational>;
+    using PiExpression = sym::Expression<double, PiRational>;
 
     class ZXException: public std::invalid_argument {
         std::string msg;

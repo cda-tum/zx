@@ -3,7 +3,9 @@
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
+#include <stdexcept>
 #include <string>
+#include <type_traits>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -17,61 +19,85 @@ namespace sym {
         static std::size_t                                  nextId;
 
         explicit Variable(const std::string& name);
-        std::size_t id{};
 
         [[nodiscard]] std::string getName() const;
+
+        inline bool operator==(const Variable& rhs) const {
+            return id == rhs.id;
+        }
+
+        inline bool operator<(const Variable& rhs) const {
+            return id < rhs.id;
+        }
+
+        inline bool operator>(const Variable& rhs) const {
+            return id > rhs.id;
+        }
+
+    private:
+        std::size_t id{};
     };
 
-    inline bool operator==(const Variable& lhs, const Variable& rhs) {
-        return lhs.id == rhs.id;
-    }
+    template<typename T, typename = std::enable_if<std::is_constructible<int, T>::value && std::is_constructible<T, double>::value>>
     class Term {
     public:
         [[nodiscard]] Variable getVar() const { return var; }
-        [[nodiscard]] double   getCoeff() const { return coeff; }
+        [[nodiscard]] T        getCoeff() const { return coeff; }
         [[nodiscard]] bool     hasZeroCoeff() const {
-                return std::abs(coeff) < TOLERANCE;
+                return std::abs(static_cast<double>(coeff)) < TOLERANCE;
         }
 
-        void addCoeff(double r);
-        Term(double coeff, Variable var):
+        Term(T coeff, Variable var):
             coeff(coeff), var(var){};
         explicit Term(Variable var):
             coeff(1), var(var){};
 
-        Term  operator-() const { return Term(-coeff, var); }
-        Term& operator*=(double rhs);
-        Term& operator/=(double rhs);
+        Term operator-() const { return Term(-coeff, var); }
+
+        void addCoeff(const T& r) {
+            coeff += r;
+        }
+        Term& operator*=(const T& rhs) {
+            coeff *= rhs;
+            return *this;
+        }
+
+        Term& operator/=(const T& rhs) {
+            coeff /= rhs;
+            return *this;
+        }
 
     private:
-        double   coeff;
+        T        coeff;
         Variable var;
     };
-
-    inline Term operator*(Term lhs, double rhs) {
+    template<typename T, typename = std::enable_if<std::is_constructible<int, T>::value>>
+    inline Term<T> operator*(Term<T> lhs, double rhs) {
         lhs *= rhs;
         return lhs;
     }
-    inline Term operator/(Term lhs, double rhs) {
+    template<typename T, typename = std::enable_if<std::is_constructible<int, T>::value>>
+    inline Term<T> operator/(Term<T> lhs, double rhs) {
         lhs /= rhs;
         return lhs;
     }
-    inline Term operator*(double lhs, const Term& rhs) {
+    template<typename T, typename = std::enable_if<std::is_constructible<int, T>::value>>
+    inline Term<T> operator*(double lhs, const Term<T>& rhs) {
         return rhs * lhs;
     }
-
-    inline Term operator/(double lhs, const Term& rhs) {
+    template<typename T, typename = std::enable_if<std::is_constructible<int, T>::value>>
+    inline Term<T> operator/(double lhs, const Term<T>& rhs) {
         return rhs / lhs;
     }
 
-    template<class T>
+    template<typename T, typename U, typename = std::enable_if<std::is_constructible<T, U>::value && std::is_constructible<U, T>::value && std::is_constructible<int, T>::value && std::is_constructible<T, double>::value>>
     class Expression {
     public:
-        using iterator       = std::vector<Term>::iterator;
-        using const_iterator = std::vector<Term>::const_iterator;
+        using iterator       = typename std::vector<Term<T>>::iterator;
+        using const_iterator = typename std::vector<Term<T>>::const_iterator;
 
         template<typename... Args>
-        explicit Expression(Term t, Args... ms) {
+        explicit Expression(Term<T> t, Args... ms) {
             terms.emplace_back(t);
             (terms.emplace_back(std::forward<Args>(ms)), ...);
             sortTerms();
@@ -80,16 +106,16 @@ namespace sym {
 
         template<typename... Args>
         explicit Expression(Variable v, Args... ms) {
-            terms.emplace_back(Term(1, v));
+            terms.emplace_back(Term(T{1}, v));
             (terms.emplace_back(std::forward<Args>(ms)), ...);
             sortTerms();
             aggregateEqualTerms();
         }
 
         Expression():
-            constant{0.0} {};
-        explicit Expression(T r):
-            constant{std::move(r)} {};
+            constant(U{T{0}}){};
+        explicit Expression(const U& r):
+            constant(r){};
 
         iterator                     begin() { return terms.begin(); }
         iterator                     end() { return terms.end(); }
@@ -98,7 +124,7 @@ namespace sym {
         [[nodiscard]] const_iterator cbegin() const { return terms.cbegin(); }
         [[nodiscard]] const_iterator cend() const { return terms.cend(); }
 
-        [[nodiscard]] bool isZero() const { return terms.empty() && constant == 0; }
+        [[nodiscard]] bool isZero() const { return terms.empty() && constant == U{T{0}}; }
         [[nodiscard]] bool isConstant() const { return terms.empty(); }
 
         Expression& operator+=(const Expression& rhs) {
@@ -114,8 +140,8 @@ namespace sym {
 
             while (t != rhs.end()) {
                 auto insert_pos = std::lower_bound(
-                        terms.begin(), terms.end(), *t, [&](const Term& lhs, const Term& rhs) {
-                            return lhs.getVar().id < rhs.getVar().id;
+                        terms.begin(), terms.end(), *t, [&](const Term<T>& lhs, const Term<T>& rhs) {
+                            return lhs.getVar() < rhs.getVar();
                         });
                 if (insert_pos != terms.end() && insert_pos->getVar() == t->getVar()) {
                     if (insert_pos->getCoeff() == -t->getCoeff()) {
@@ -132,44 +158,70 @@ namespace sym {
             return *this;
         }
 
-        Expression& operator+=(const Term& rhs) {
+        Expression<T, U>& operator+=(const Term<T>& rhs) {
             return *this += Expression(rhs);
         }
 
-        Expression& operator+=(const T& rhs) {
+        Expression<T, U>& operator+=(const U& rhs) {
             constant += rhs;
             return *this;
         }
 
-        Expression& operator-=(const Expression& rhs) {
+        Expression<T, U>& operator-=(const Expression<T, U>& rhs) {
             return *this += -rhs;
         }
 
-        Expression& operator-=(const Term& rhs) {
+        Expression<T, U>& operator-=(const Term<T>& rhs) {
             return *this += -rhs;
         }
-        Expression& operator-=(const T& rhs) {
+        Expression<T, U>& operator-=(const U& rhs) {
             return *this += -rhs;
         }
 
-        Expression& multTerms(double x) {
-            std::for_each(terms.begin(), terms.end(), [&](auto& term) { term *= x; });
+        Expression<T, U>& operator*=(const T& rhs) {
+            if (std::abs(static_cast<double>(rhs)) < TOLERANCE) {
+                terms.clear();
+                constant = U{T{0}};
+                return *this;
+            }
+            std::for_each(terms.begin(), terms.end(), [&](auto& term) { term *= rhs; });
+            constant *= U{rhs};
+            return *this;
         }
 
-        Expression& multConst(const T& x) {
-            constant *= x;
+        template<typename = std::enable_if<!std::is_same<T, U>::value>>
+        Expression<T, U>& operator*=(const U& rhs) {
+            if (std::abs(static_cast<double>(T{rhs})) < TOLERANCE) {
+                terms.clear();
+                constant = U{T{0}};
+                return *this;
+            }
+            std::for_each(terms.begin(), terms.end(), [&](auto& term) { term *= T{rhs}; });
+            constant *= rhs;
+            return *this;
         }
 
-        Expression& divTerms(double x) {
-            std::for_each(terms.begin(), terms.end(), [&](auto& term) { term /= x; });
+        Expression<T, U>& operator/=(const T& rhs) {
+            if (std::abs(static_cast<double>(T{rhs})) < TOLERANCE) {
+                throw std::runtime_error("Trying to divide expression by 0!");
+            }
+            std::for_each(terms.begin(), terms.end(), [&](auto& term) { term /= rhs; });
+            constant /= U{rhs};
+            return *this;
         }
 
-        Expression& divConst(const T& x) {
-            constant /= x;
+        template<typename = std::enable_if<!std::is_same<T, U>::value>>
+        Expression<T, U>& operator/=(const U& rhs) {
+            if (std::abs(static_cast<double>(T{rhs})) < TOLERANCE) {
+                throw std::runtime_error("Trying to divide expression by 0!");
+            }
+            std::for_each(terms.begin(), terms.end(), [&](auto& term) { term /= T{rhs}; });
+            constant /= rhs;
+            return *this;
         }
 
-        [[nodiscard]] Expression operator-() const {
-            Expression e;
+        [[nodiscard]] Expression<T, U> operator-() const {
+            Expression<T, U> e;
             e.terms.reserve(terms.size());
             for (auto& t: terms)
                 e.terms.push_back(-t);
@@ -177,20 +229,21 @@ namespace sym {
             return e;
         }
 
-        [[nodiscard]] const Term& operator[](std::size_t i) const { return terms[i]; }
-        [[nodiscard]] T           getConst() const { return constant; }
-        void                      setConst(const T& val) { constant = val; }
-        [[nodiscard]] auto        numTerms() const { return terms.size(); }
+        [[nodiscard]] const Term<T>& operator[](std::size_t i) const { return terms[i]; }
+        [[nodiscard]] U              getConst() const { return constant; }
+        void                         setConst(const U& val) { constant = val; }
+        [[nodiscard]] auto           numTerms() const { return terms.size(); }
 
     private:
-        std::vector<Term> terms;
-        T                 constant;
+        std::vector<Term<T>> terms;
+        U                    constant;
 
         void sortTerms() {
-            std::sort(terms.begin(), terms.end(), [&](const Term& lhs, const Term& rhs) {
-                return lhs.getVar().id < rhs.getVar().id;
+            std::sort(terms.begin(), terms.end(), [&](const Term<T>& lhs, const Term<T>& rhs) {
+                return lhs.getVar() < rhs.getVar();
             });
         }
+
         void aggregateEqualTerms() {
             for (auto t = terms.begin(); t != terms.end();) {
                 auto next = std::next(t);
@@ -207,41 +260,86 @@ namespace sym {
         }
     };
 
-    template<class T>
-    inline Expression<T> operator+(Expression<T> lhs, const Expression<T>& rhs) {
+    template<typename T, typename U>
+    inline Expression<T, U> operator+(Expression<T, U>        lhs,
+                                      const Expression<T, U>& rhs) {
         lhs += rhs;
         return lhs;
     }
 
-    template<class T>
-    inline Expression<T> operator+(Expression<T> lhs, const Term& rhs) {
+    template<typename T, typename U>
+    inline Expression<T, U> operator+(Expression<T, U> lhs, const Term<T>& rhs) {
         lhs += rhs;
         return lhs;
     }
 
-    template<class T>
-    inline Expression<T> operator+(Expression<T> lhs, const T& rhs) {
+    template<typename T, typename U>
+    inline Expression<T, U> operator+(Expression<T, U> lhs, const T& rhs) {
         lhs += rhs;
         return lhs;
     }
-    template<class T>
-    inline Expression<T> operator-(Expression<T> lhs, const Expression<T>& rhs) {
+    template<typename T, typename U>
+    inline Expression<T, U> operator-(Expression<T, U> lhs, const Expression<T, U>& rhs) {
         lhs -= rhs;
         return lhs;
     }
-    template<class T>
-    inline Expression<T> operator-(Expression<T> lhs, const Term& rhs) {
+    template<typename T, typename U>
+    inline Expression<T, U> operator-(Expression<T, U> lhs, const Term<T>& rhs) {
         lhs -= rhs;
         return lhs;
     }
-    template<class T>
-    inline Expression<T> operator-(Expression<T> lhs, const T& rhs) {
+    template<typename T, typename U>
+    inline Expression<T, U> operator-(Expression<T, U> lhs, const T& rhs) {
         lhs -= rhs;
         return lhs;
     }
 
-    template<class T>
-    inline bool operator==(const Expression<T>& lhs, const Expression<T>& rhs) {
+    template<typename T, typename U>
+    inline Expression<T, U> operator*(Expression<T, U> lhs, const T& rhs) {
+        lhs *= rhs;
+        return lhs;
+    }
+
+    template<typename T, typename U, typename = std::enable_if<!std::is_same<T, U>::value>>
+    inline Expression<T, U> operator*(Expression<T, U> lhs, const U& rhs) {
+        lhs *= rhs;
+        return lhs;
+    }
+
+    template<typename T, typename U>
+    inline Expression<T, U> operator/(Expression<T, U> lhs, const T& rhs) {
+        lhs /= rhs;
+        return lhs;
+    }
+
+    template<typename T, typename U, typename = std::enable_if<!std::is_same<T, U>::value>>
+    inline Expression<T, U> operator/(Expression<T, U> lhs, const U& rhs) {
+        lhs /= rhs;
+        return lhs;
+    }
+
+    template<typename T, typename U>
+    inline Expression<T, U> operator*(const T& lhs, Expression<T, U> rhs) {
+        return rhs * lhs;
+    }
+
+    template<typename T, typename U, typename = std::enable_if<!std::is_same<T, U>::value>>
+    inline Expression<T, U> operator*(const U& lhs, Expression<T, U> rhs) {
+        return rhs * lhs;
+    }
+
+    template<typename T, typename U>
+    inline Expression<T, U> operator/(const T& lhs, Expression<T, U> rhs) {
+        return rhs / lhs;
+    }
+
+    template<typename T, typename U, typename = std::enable_if<!std::is_same<T, U>::value>>
+    inline Expression<T, U> operator/(const U& lhs, Expression<T, U> rhs) {
+        return rhs / lhs;
+    }
+
+    template<typename T, typename U>
+    inline bool operator==(const Expression<T, U>& lhs, const Expression<T, U>& rhs) {
         if (lhs.numTerms() != rhs.numTerms() || lhs.getConst() != rhs.getConst())
             return false;
 
@@ -257,14 +355,15 @@ namespace sym {
         return os;
     }
 
-    inline std::ostream& operator<<(std::ostream& os, const Term& rhs) {
+    template<typename T>
+    inline std::ostream& operator<<(std::ostream& os, const Term<T>& rhs) {
         // os << rhs.getCoeff() << "*" << rhs.getVar();
         os << rhs.getVar();
         return os;
     }
 
-    template<class T>
-    inline std::ostream& operator<<(std::ostream& os, const Expression<T>& rhs) {
+    template<typename T, typename U>
+    inline std::ostream& operator<<(std::ostream& os, const Expression<T, U>& rhs) {
         for (auto& t: rhs) {
             os << t << " + ";
         }

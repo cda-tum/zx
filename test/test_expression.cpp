@@ -3,6 +3,7 @@
 #include "ZXDiagram.hpp"
 
 #include <gtest/gtest.h>
+#include <stdexcept>
 
 class ExpressionTest: public ::testing::Test {
 public:
@@ -10,16 +11,16 @@ public:
     // const sym::Variable y_var{1, "y"};
     // const sym::Variable z_var{2, "z"};
 
-    sym::Term x{sym::Variable("x")};
-    sym::Term y{sym::Variable("y")};
-    sym::Term z{sym::Variable("z")};
+    sym::Term<double> x{sym::Variable("x")};
+    sym::Term<double> y{sym::Variable("y")};
+    sym::Term<double> z{sym::Variable("z")};
 
 protected:
     virtual void SetUp() {}
 };
 
 TEST_F(ExpressionTest, basic_ops_1) {
-    sym::Expression<double> e(x);
+    sym::Expression<double, double> e(x);
 
     EXPECT_EQ(1, e.numTerms());
     EXPECT_EQ(zx::PiRational(0, 1), e.getConst());
@@ -39,13 +40,13 @@ TEST_F(ExpressionTest, basic_ops_1) {
 }
 
 TEST_F(ExpressionTest, basic_ops_2) {
-    sym::Expression<zx::PiRational> e1;
+    sym::Expression<double, zx::PiRational> e1;
     e1 += x;
     e1 += 10.0 * y;
     e1 += 5.0 * z;
     e1 += zx::PiRational(1, 2);
 
-    sym::Expression<zx::PiRational> e2;
+    sym::Expression<double, zx::PiRational> e2;
     e2 += -5.0 * x;
     e2 += -10.0 * y;
     e2 += -4.9 * z;
@@ -59,4 +60,34 @@ TEST_F(ExpressionTest, basic_ops_2) {
     EXPECT_EQ(sum[0].getVar().getName(), "x");
     EXPECT_EQ(sum[1].getVar().getName(), "z");
     EXPECT_EQ(sum.getConst(), zx::PiRational(0, 1));
+}
+
+TEST_F(ExpressionTest, mult) {
+    sym::Expression<double, zx::PiRational> e(x);
+
+    e = e * 2.0;
+
+    EXPECT_PRED_FORMAT2(testing::FloatLE, e[0].getCoeff(), 2);
+
+    e = e * zx::PiRational(0.5);
+
+    EXPECT_PRED_FORMAT2(testing::FloatLE, e[0].getCoeff(), 1);
+
+    e = e * 0.0;
+
+    EXPECT_TRUE(e.isZero());
+}
+
+TEST_F(ExpressionTest, div) {
+    sym::Expression<double, zx::PiRational> e(x);
+
+    e = e / 2.0;
+
+    EXPECT_PRED_FORMAT2(testing::FloatLE, e[0].getCoeff(), 0.5);
+
+    e = e / zx::PiRational(0.5);
+
+    EXPECT_PRED_FORMAT2(testing::FloatLE, e[0].getCoeff(), 1);
+
+    EXPECT_THROW(e = e / 0.0, std::runtime_error);
 }

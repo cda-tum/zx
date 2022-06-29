@@ -463,9 +463,9 @@ TEST_F(SimplifyTest, fullReduceNotApprox) {
 }
 
 TEST_F(SimplifyTest, idSymbolic) {
-    sym::Term x{sym::Variable("x")};
-    sym::Term y{sym::Variable("y")};
-    sym::Term z{sym::Variable("z")};
+    sym::Term<double> x{sym::Variable("x")};
+    sym::Term<double> y{sym::Variable("y")};
+    sym::Term<double> z{sym::Variable("z")};
 
     std::size_t nqubits = 50;
 
@@ -483,10 +483,10 @@ TEST_F(SimplifyTest, idSymbolic) {
 }
 
 TEST_F(SimplifyTest, equivalenceSymbolic) {
-    sym::Term     x{sym::Variable("x")};
-    sym::Term     y{sym::Variable("y")};
-    sym::Term     z{sym::Variable("z")};
-    zx::ZXDiagram d1 = make_empty_diagram(3);
+    sym::Term<double> x{sym::Variable("x")};
+    sym::Term<double> y{sym::Variable("y")};
+    sym::Term<double> z{sym::Variable("z")};
+    zx::ZXDiagram     d1 = make_empty_diagram(3);
 
     // first circuit
     d1.addVertex(0, 0); // 6

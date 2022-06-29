@@ -26,19 +26,6 @@ namespace sym {
         return names[id];
     }
 
-    void Term::addCoeff(double r) {
-        coeff += r;
-    }
-    Term& Term::operator*=(double rhs) {
-        coeff *= rhs;
-        return *this;
-    }
-
-    Term& Term::operator/=(double rhs) {
-        coeff /= rhs;
-        return *this;
-    }
-
     // bool Expression::isPauli() const {
     //     return isConstant() && constant.isInteger();
     // }
