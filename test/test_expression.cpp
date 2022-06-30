@@ -20,7 +20,7 @@ protected:
 };
 
 TEST_F(ExpressionTest, basic_ops_1) {
-    sym::Expression<double, double> e(x);
+    sym::Expression<double, zx::PiRational> e(x);
 
     EXPECT_EQ(1, e.numTerms());
     EXPECT_EQ(zx::PiRational(0, 1), e.getConst());
