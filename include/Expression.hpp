@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
+#include <exception>
+#include <numeric>
 #include <ostream>
 #include <stdexcept>
 #include <string>
@@ -13,6 +15,18 @@
 
 namespace sym {
     static constexpr double TOLERANCE = 1e-9;
+
+    class SymbolicException: public std::invalid_argument {
+        std::string msg;
+
+    public:
+        explicit SymbolicException(std::string msg):
+            std::invalid_argument("Symbolic Exception"), msg(std::move(msg)) {}
+
+        [[nodiscard]] const char* what() const noexcept override {
+            return msg.c_str();
+        }
+    };
 
     struct Variable {
         static std::unordered_map<std::string, std::size_t> registered;
@@ -42,6 +56,19 @@ namespace sym {
     private:
         std::size_t id{};
     };
+} // namespace sym
+
+namespace std {
+    template<>
+    struct hash<sym::Variable> {
+        std::size_t operator()(const sym::Variable& var) const {
+            return std::hash<std::string>()(var.getName());
+        }
+    };
+} // namespace std
+
+namespace sym {
+    using VariableAssignment = std::unordered_map<Variable, double>;
 
     template<typename T, typename = std::enable_if<std::is_constructible<int, T>::value && std::is_constructible<T, double>::value>>
     class Term {
@@ -71,6 +98,15 @@ namespace sym {
             coeff /= rhs;
             return *this;
         }
+        [[nodiscard]] bool totalAssignment(const VariableAssignment& assignment) const {
+            return assignment.find(getVar()) != assignment.end();
+        }
+
+        [[nodiscard]] double evaluate(const VariableAssignment& assignment) const {
+            if (!totalAssignment(assignment))
+                throw SymbolicException("Cannot instantiate variable " + getVar().getName() + ". No value given.");
+            return assignment.at(getVar()) * getCoeff();
+        }
 
     private:
         T        coeff;
@@ -95,7 +131,7 @@ namespace sym {
         return rhs / lhs;
     }
 
-    template<typename T, typename U, typename = std::enable_if<std::is_constructible<T, U>::value && std::is_constructible<U, T>::value && std::is_constructible<int, T>::value && std::is_constructible<T, double>::value>>
+    template<typename T, typename U, typename = std::enable_if<std::is_constructible<T, U>::value && std::is_constructible<U, T>::value && std::is_constructible<int, T>::value && std::is_constructible<T, double>::value && std::is_constructible<U, double>::value>>
     class Expression {
     public:
         using iterator       = typename std::vector<Term<T>>::iterator;
@@ -249,6 +285,11 @@ namespace sym {
             return Expression<T, V>(terms, V{constant});
         }
 
+        double evaluate(const VariableAssignment& assignment) {
+            auto initial = static_cast<double>(constant);
+            return std::accumulate(terms.begin(), terms.end(), initial, [&](double sum, const auto& term) { return term.evaluate(assignment) + sum; });
+        }
+
     private:
         std::vector<Term<T>> terms;
         U                    constant{T{0.0}};
@@ -400,12 +441,3 @@ namespace sym {
         return os;
     }
 } // namespace sym
-
-namespace std {
-    template<>
-    struct hash<sym::Variable> {
-        std::size_t operator()(const sym::Variable& var) const {
-            return std::hash<std::string>()(var.getName());
-        }
-    };
-} // namespace std

@@ -191,3 +191,16 @@ TEST_F(ExpressionTest, Convertability) {
 
     EXPECT_EQ(piE, zx::PiExpression({x, y}, zx::PiRational(1, 1)));
 }
+
+TEST_F(ExpressionTest, Instantiation) {
+    sym::Expression<double, double> e(2 * x, y);
+
+    sym::VariableAssignment assignment{
+            {sym::Variable{"x"}, 2.0}, {sym::Variable{"y"}, 1.0}};
+
+    EXPECT_PRED_FORMAT2(testing::FloatLE, e.evaluate(assignment), 5.0);
+
+    e += z;
+
+    EXPECT_THROW(e.evaluate(assignment), sym::SymbolicException);
+}
