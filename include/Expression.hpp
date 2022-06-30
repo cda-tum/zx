@@ -117,6 +117,9 @@ namespace sym {
             aggregateEqualTerms();
         }
 
+        Expression(const std::vector<Term<T>>& terms, const U& constant):
+            terms(terms), constant(constant){};
+
         Expression() = default;
 
         explicit Expression(const U& r):
@@ -238,6 +241,13 @@ namespace sym {
         [[nodiscard]] U              getConst() const { return constant; }
         void                         setConst(const U& val) { constant = val; }
         [[nodiscard]] auto           numTerms() const { return terms.size(); }
+
+        [[nodiscard]] const std::vector<Term<T>>& getTerms() const { return terms; }
+
+        template<typename V, typename std::enable_if<std::is_constructible<U, V>::value>::type* = nullptr>
+        Expression<T, V> convert() const {
+            return Expression<T, V>(terms, V{constant});
+        }
 
     private:
         std::vector<Term<T>> terms;

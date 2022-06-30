@@ -183,3 +183,10 @@ TEST_F(ExpressionTest, Clifford) {
     EXPECT_FALSE(zx::isClifford(e));
     EXPECT_FALSE(zx::isProperClifford(e));
 }
+
+TEST_F(ExpressionTest, Convertability) {
+    sym::Expression<double, double> e({x, y}, zx::PI);
+    auto                            piE = e.convert<zx::PiRational>();
+
+    EXPECT_EQ(piE, zx::PiExpression({x, y}, zx::PiRational(1, 1)));
+}
