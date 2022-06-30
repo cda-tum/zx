@@ -285,7 +285,13 @@ namespace sym {
     }
 
     template<typename T, typename U>
-    inline Expression<T, U> operator+(Expression<T, U> lhs, const T& rhs) {
+    inline Expression<T, U> operator+(const U& lhs, Expression<T, U> rhs) {
+        rhs += lhs;
+        return rhs;
+    }
+
+    template<typename T, typename U>
+    inline Expression<T, U> operator+(Expression<T, U> lhs, const U& rhs) {
         lhs += rhs;
         return lhs;
     }
@@ -312,14 +318,15 @@ namespace sym {
         return rhs;
     }
     template<typename T, typename U>
-    inline Expression<T, U> operator-(Expression<T, U> lhs, const T& rhs) {
-        lhs -= rhs;
-        return lhs;
-    }
-    template<typename T, typename U>
-    inline Expression<T, U> operator-(const T& lhs, Expression<T, U> rhs) {
+    inline Expression<T, U> operator-(const U& lhs, Expression<T, U> rhs) {
         rhs -= lhs;
         return rhs;
+    }
+
+    template<typename T, typename U>
+    inline Expression<T, U> operator-(Expression<T, U> lhs, const U& rhs) {
+        lhs -= rhs;
+        return lhs;
     }
 
     template<typename T, typename U>

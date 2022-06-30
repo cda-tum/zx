@@ -61,6 +61,11 @@ TEST_F(ExpressionTest, basic_ops_2) {
     EXPECT_EQ(sum[0].getVar().getName(), "x");
     EXPECT_EQ(sum[1].getVar().getName(), "z");
     EXPECT_EQ(sum.getConst(), zx::PiRational(0, 1));
+
+    sum += zx::PiRational(1, 1);
+    EXPECT_EQ(sum.getConst(), zx::PiRational(1, 1));
+    sum -= zx::PiRational(1, 1);
+    EXPECT_EQ(sum.getConst(), zx::PiRational(0, 1));
 }
 
 TEST_F(ExpressionTest, mult) {
