@@ -1,5 +1,6 @@
 #include "Expression.hpp"
 #include "Rational.hpp"
+#include "Utils.hpp"
 #include "ZXDiagram.hpp"
 
 #include <gtest/gtest.h>
@@ -127,8 +128,8 @@ TEST_F(ExpressionTest, Distributive) {
 }
 
 TEST_F(ExpressionTest, Variable) {
-    EXPECT_NE(sym::Variable{"x"}, sym::Variable{"y"});
-    EXPECT_EQ(sym::Variable{"x"}, sym::Variable{"x"});
+    EXPECT_TRUE(sym::Variable{"x"} != sym::Variable{"y"});
+    EXPECT_TRUE(sym::Variable{"x"} == sym::Variable{"x"});
     EXPECT_TRUE(sym::Variable{"x"} < sym::Variable{"y"});
     EXPECT_TRUE(sym::Variable{"z"} > sym::Variable{"y"});
 }
@@ -138,9 +139,42 @@ TEST_F(ExpressionTest, SumNegation) {
     sym::Expression<double, double> e2(z, y);
 
     EXPECT_EQ(e1 - e2, e1 + (-e2));
+    const auto& zero = sym::Expression<double, double>{};
+    EXPECT_EQ(e1 + (-e1), zero);
 }
 
 TEST_F(ExpressionTest, SumMult) {
     sym::Expression<double, double> e1(x, y);
     EXPECT_EQ(e1 + e1, e1 * 2.0);
+}
+
+TEST_F(ExpressionTest, CliffordRounding) {
+    double           eps = 1e-14;
+    zx::PiExpression e{zx::PiRational(zx::PI - eps)};
+    zx::roundToClifford(e, 1e-9);
+    EXPECT_EQ(e, zx::PiExpression(zx::PiRational(1, 1)));
+    e = zx::PiExpression{zx::PiRational(zx::PI / 2 - eps)};
+    zx::roundToClifford(e, 1e-9);
+    EXPECT_EQ(e, zx::PiExpression(zx::PiRational(1, 2)));
+    e = zx::PiExpression{zx::PiRational(-zx::PI / 2 - eps)};
+    zx::roundToClifford(e, 1e-9);
+    EXPECT_EQ(e, zx::PiExpression(zx::PiRational(-1, 2)));
+}
+
+TEST_F(ExpressionTest, Clifford) {
+    zx::PiExpression e{zx::PiRational(zx::PI)};
+
+    EXPECT_TRUE(zx::isPauli(e));
+    EXPECT_TRUE(zx::isClifford(e));
+    EXPECT_FALSE(zx::isProperClifford(e));
+
+    e = zx::PiExpression{zx::PiRational(zx::PI / 2)};
+    EXPECT_FALSE(zx::isPauli(e));
+    EXPECT_TRUE(zx::isClifford(e));
+    EXPECT_TRUE(zx::isProperClifford(e));
+
+    e = zx::PiExpression{zx::PiRational(zx::PI / 4)};
+    EXPECT_FALSE(zx::isPauli(e));
+    EXPECT_FALSE(zx::isClifford(e));
+    EXPECT_FALSE(zx::isProperClifford(e));
 }
