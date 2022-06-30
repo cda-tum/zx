@@ -26,28 +26,8 @@ namespace sym {
         return names[id];
     }
 
-    // bool Expression::isPauli() const {
-    //     return isConstant() && constant.isInteger();
-    // }
-    // bool Expression::isClifford() const {
-    //     return isConstant() && (constant.isInteger() || constant.getDenom() == 2);
-    // }
-    // bool Expression::isProperClifford() const {
-    //     return isConstant() && constant.getDenom() == 2;
-    // }
-    // void Expression::roundToClifford(fp tolerance) {
-    //     if (!isConstant())
-    //         return;
-
-    //     if (constant.isCloseDivPi(0, tolerance)) {
-    //         constant = PiRational(0, 1);
-    //     } else if (constant.isCloseDivPi(0.5, tolerance)) {
-    //         constant = PiRational(1, 2);
-    //     } else if (constant.isCloseDivPi(-0.5, tolerance)) {
-    //         constant = PiRational(-1, 2);
-    //     } else if (constant.isCloseDivPi(1, tolerance)) {
-    //         constant = PiRational(1, 1);
-    //     }
-    // }
-
+    std::ostream& operator<<(std::ostream& os, const Variable& var) {
+        os << var.getName();
+        return os;
+    }
 } // namespace sym

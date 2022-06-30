@@ -11,7 +11,7 @@ public:
     // const sym::Variable y_var{1, "y"};
     // const sym::Variable z_var{2, "z"};
 
-    sym::Term<double> x{sym::Variable("x")};
+    sym::Term<double> x{1.0, sym::Variable("x")};
     sym::Term<double> y{sym::Variable("y")};
     sym::Term<double> z{sym::Variable("z")};
 
@@ -73,6 +73,10 @@ TEST_F(ExpressionTest, mult) {
 
     EXPECT_PRED_FORMAT2(testing::FloatLE, e[0].getCoeff(), 1);
 
+    e += sym::Expression<double, zx::PiRational>{};
+
+    EXPECT_PRED_FORMAT2(testing::FloatLE, e[0].getCoeff(), 1);
+
     e = e * 0.0;
 
     EXPECT_TRUE(e.isZero());
@@ -90,4 +94,53 @@ TEST_F(ExpressionTest, div) {
     EXPECT_PRED_FORMAT2(testing::FloatLE, e[0].getCoeff(), 1);
 
     EXPECT_THROW(e = e / 0.0, std::runtime_error);
+}
+
+TEST_F(ExpressionTest, Commutativity) {
+    sym::Expression<double, double> e1(x, y);
+    sym::Expression<double, double> e2(z);
+    e2.setConst(1.0);
+
+    EXPECT_EQ(e1 + e2, e2 + e1);
+    EXPECT_EQ(e1 * 2.0, 2.0 * e1);
+}
+
+TEST_F(ExpressionTest, Associativity) {
+    sym::Expression<double, double> e1(x, y);
+    sym::Expression<double, double> e2(z);
+    sym::Expression<double, double> e3(1.0);
+
+    EXPECT_EQ(e1 + (e2 + e3), (e1 + e2) + e3);
+    EXPECT_EQ(e1 * (2.0 * 4.0), (e1 * 2.0) * 4.0);
+}
+
+TEST_F(ExpressionTest, Distributive) {
+    sym::Expression<double, double> e1(x, y);
+    sym::Expression<double, double> e2(z);
+
+    EXPECT_EQ((e1 + e2) * 2.0, (e1 * 2.0) + (e2 * 2.0));
+    EXPECT_EQ((e1 - e2) * 2.0, (e1 * 2.0) - (e2 * 2.0));
+    std::cout << (e1 + e2) / 2.0 << std::endl;
+    std::cout << (e1 / 2.0) + (e2 / 2.0) << std::endl;
+    EXPECT_EQ((e1 + e2) / 2.0, (e1 / 2.0) + (e2 / 2.0));
+    EXPECT_EQ((e1 - e2) / 2.0, (e1 / 2.0) - (e2 / 2.0));
+}
+
+TEST_F(ExpressionTest, Variable) {
+    EXPECT_NE(sym::Variable{"x"}, sym::Variable{"y"});
+    EXPECT_EQ(sym::Variable{"x"}, sym::Variable{"x"});
+    EXPECT_TRUE(sym::Variable{"x"} < sym::Variable{"y"});
+    EXPECT_TRUE(sym::Variable{"z"} > sym::Variable{"y"});
+}
+
+TEST_F(ExpressionTest, SumNegation) {
+    sym::Expression<double, double> e1(x, y);
+    sym::Expression<double, double> e2(z, y);
+
+    EXPECT_EQ(e1 - e2, e1 + (-e2));
+}
+
+TEST_F(ExpressionTest, SumMult) {
+    sym::Expression<double, double> e1(x, y);
+    EXPECT_EQ(e1 + e1, e1 * 2.0);
 }

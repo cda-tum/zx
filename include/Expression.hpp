@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
+#include <ostream>
 #include <stdexcept>
 #include <string>
 #include <type_traits>
@@ -24,6 +25,10 @@ namespace sym {
 
         inline bool operator==(const Variable& rhs) const {
             return id == rhs.id;
+        }
+
+        inline bool operator!=(const Variable& rhs) const {
+            return !((*this) == rhs);
         }
 
         inline bool operator<(const Variable& rhs) const {
@@ -112,8 +117,8 @@ namespace sym {
             aggregateEqualTerms();
         }
 
-        Expression():
-            constant(U{T{0}}){};
+        Expression() = default;
+
         explicit Expression(const U& r):
             constant(r){};
 
@@ -236,7 +241,7 @@ namespace sym {
 
     private:
         std::vector<Term<T>> terms;
-        U                    constant;
+        U                    constant{T{0.0}};
 
         void sortTerms() {
             std::sort(terms.begin(), terms.end(), [&](const Term<T>& lhs, const Term<T>& rhs) {
@@ -274,10 +279,23 @@ namespace sym {
     }
 
     template<typename T, typename U>
+    inline Expression<T, U> operator+(const Term<T>& lhs, Expression<T, U> rhs) {
+        rhs += lhs;
+        return rhs;
+    }
+
+    template<typename T, typename U>
     inline Expression<T, U> operator+(Expression<T, U> lhs, const T& rhs) {
         lhs += rhs;
         return lhs;
     }
+
+    template<typename T, typename U>
+    inline Expression<T, U> operator+(const T& lhs, Expression<T, U> rhs) {
+        rhs += rhs;
+        return rhs;
+    }
+
     template<typename T, typename U>
     inline Expression<T, U> operator-(Expression<T, U> lhs, const Expression<T, U>& rhs) {
         lhs -= rhs;
@@ -289,9 +307,19 @@ namespace sym {
         return lhs;
     }
     template<typename T, typename U>
+    inline Expression<T, U> operator-(const Term<T>& lhs, Expression<T, U> rhs) {
+        rhs -= lhs;
+        return rhs;
+    }
+    template<typename T, typename U>
     inline Expression<T, U> operator-(Expression<T, U> lhs, const T& rhs) {
         lhs -= rhs;
         return lhs;
+    }
+    template<typename T, typename U>
+    inline Expression<T, U> operator-(const T& lhs, Expression<T, U> rhs) {
+        rhs -= lhs;
+        return rhs;
     }
 
     template<typename T, typename U>
@@ -300,7 +328,7 @@ namespace sym {
         return lhs;
     }
 
-    template<typename T, typename U, typename = std::enable_if<!std::is_same<T, U>::value>>
+    template<typename T, typename U, typename std::enable_if<!std::is_same<T, U>::value>::type* = nullptr>
     inline Expression<T, U> operator*(Expression<T, U> lhs, const U& rhs) {
         lhs *= rhs;
         return lhs;
@@ -312,7 +340,7 @@ namespace sym {
         return lhs;
     }
 
-    template<typename T, typename U, typename = std::enable_if<!std::is_same<T, U>::value>>
+    template<typename T, typename U, typename std::enable_if<!std::is_same<T, U>::value>::type* = nullptr>
     inline Expression<T, U> operator/(Expression<T, U> lhs, const U& rhs) {
         lhs /= rhs;
         return lhs;
@@ -323,19 +351,9 @@ namespace sym {
         return rhs * lhs;
     }
 
-    template<typename T, typename U, typename = std::enable_if<!std::is_same<T, U>::value>>
+    template<typename T, typename U, typename std::enable_if<!std::is_same<T, U>::value>::type* = nullptr>
     inline Expression<T, U> operator*(const U& lhs, Expression<T, U> rhs) {
         return rhs * lhs;
-    }
-
-    template<typename T, typename U>
-    inline Expression<T, U> operator/(const T& lhs, Expression<T, U> rhs) {
-        return rhs / lhs;
-    }
-
-    template<typename T, typename U, typename = std::enable_if<!std::is_same<T, U>::value>>
-    inline Expression<T, U> operator/(const U& lhs, Expression<T, U> rhs) {
-        return rhs / lhs;
     }
 
     template<typename T, typename U>
@@ -350,25 +368,18 @@ namespace sym {
         return true;
     }
 
-    // inline std::ostream& operator<<(std::ostream& os, const Variable& rhs) {
-    //     os << rhs.getName();
-    //     return os;
-    // }
+    std::ostream& operator<<(std::ostream& os, const Variable& var);
 
-    // template<typename T>
-    // inline std::ostream& operator<<(std::ostream& os, const Term<T>& rhs) {
-    //     // os << rhs.getCoeff() << "*" << rhs.getVar();
-    //     os << rhs.getVar();
-    //     return os;
-    // }
+    template<typename T>
+    std::ostream& operator<<(std::ostream& os, const Term<T>& term) {
+        os << term.getCoeff() << "*" << term.getVar().getName();
+        return os;
+    }
 
-    // template<typename T, typename U>
-    // inline std::ostream& operator<<(std::ostream& os, const Expression<T, U>& rhs) {
-    //     for (auto& t: rhs) {
-    //         os << t << " + ";
-    //     }
-    //     os << rhs.getConst();
-    //     return os;
-    // }
-
+    template<typename T, typename U>
+    std::ostream& operator<<(std::ostream& os, const Expression<T, U>& expr) {
+        std::for_each(expr.begin(), expr.end(), [&](const auto& term) { os << term << " + "; });
+        os << expr.getConst();
+        return os;
+    }
 } // namespace sym
