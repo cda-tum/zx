@@ -50,6 +50,9 @@ namespace zx {
         [[nodiscard]] std::vector<Edge>&  incidentEdges(Vertex v) {
              return edges[v];
         }
+        [[nodiscard]] const Edge& incidentEdge(Vertex v, std::size_t n) {
+            return edges[v][n];
+        }
 
         [[nodiscard]] std::size_t degree(Vertex v) const { return edges[v].size(); }
 
@@ -75,10 +78,13 @@ namespace zx {
         [[nodiscard]] const std::vector<Vertex>& getInputs() const {
             return inputs;
         }
+        [[nodiscard]] Vertex getInput(std::size_t i) const { return inputs[i]; }
 
         [[nodiscard]] const std::vector<Vertex>& getOutputs() const {
             return outputs;
         }
+
+        [[nodiscard]] Vertex getOutput(std::size_t i) const { return outputs[i]; }
 
         [[nodiscard]] bool isDeleted(Vertex v) const {
             return !vertices[v].has_value();
