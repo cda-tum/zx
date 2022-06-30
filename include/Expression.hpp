@@ -400,3 +400,12 @@ namespace sym {
         return os;
     }
 } // namespace sym
+
+namespace std {
+    template<>
+    struct hash<sym::Variable> {
+        std::size_t operator()(const sym::Variable& var) const {
+            return std::hash<std::string>()(var.getName());
+        }
+    };
+} // namespace std

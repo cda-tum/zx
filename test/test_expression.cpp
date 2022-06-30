@@ -5,6 +5,7 @@
 
 #include <gtest/gtest.h>
 #include <stdexcept>
+#include <variant>
 
 class ExpressionTest: public ::testing::Test {
 public:
