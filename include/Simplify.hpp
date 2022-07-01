@@ -4,12 +4,12 @@
 #include "ZXDiagram.hpp"
 
 namespace zx {
-    using VertexCheckFun         = decltype(checkIdSimp);
-    using VertexRuleFun          = decltype(removeId);
-    using EdgeCheckFun           = decltype(checkSpiderFusion);
-    using EdgeRuleFun            = decltype(fuseSpiders);
-    constexpr auto defaultIsDone = []() { return false; };
-    using TerminationFun         = decltype(defaultIsDone);
+    using VertexCheckFun                          = decltype(checkIdSimp);
+    using VertexRuleFun                           = decltype(removeId);
+    using EdgeCheckFun                            = decltype(checkSpiderFusion);
+    using EdgeRuleFun                             = decltype(fuseSpiders);
+    const std::function<bool(void)> defaultIsDone = []() { return false; };
+    using TerminationFun                          = decltype(defaultIsDone);
 
     std::size_t simplifyVertices(ZXDiagram& diag, VertexCheckFun check,
                                  VertexRuleFun rule, const TerminationFun& isDone = defaultIsDone);
