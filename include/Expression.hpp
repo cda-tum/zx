@@ -285,7 +285,7 @@ namespace sym {
             return Expression<T, V>(terms, V{constant});
         }
 
-        double evaluate(const VariableAssignment& assignment) {
+        [[nodiscard]] double evaluate(const VariableAssignment& assignment) const {
             auto initial = static_cast<double>(constant);
             return std::accumulate(terms.begin(), terms.end(), initial, [&](double sum, const auto& term) { return term.evaluate(assignment) + sum; });
         }
