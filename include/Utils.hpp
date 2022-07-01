@@ -114,10 +114,11 @@ namespace zx {
             friend bool operator!=(const EdgeIterator& a, const EdgeIterator& b);
 
         private:
-            Vertex                                  v;
-            std::vector<Edge>::iterator             currentPos;
-            std::vector<std::vector<Edge>>&         edges;
-            std::vector<std::optional<VertexData>>& vertices;
+            Vertex                                   v;
+            std::vector<Edge>::iterator              currentPos;
+            std::vector<std::vector<Edge>>::iterator edgesPos;
+            std::vector<std::vector<Edge>>&          edges;
+            std::vector<std::optional<VertexData>>&  vertices;
 
             void checkNextVertex();
         };
