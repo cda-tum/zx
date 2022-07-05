@@ -47,8 +47,8 @@ namespace zx {
 
     bool checkLocalComp(ZXDiagram& diag, Vertex v) {
         auto v_data =
-                diag.getVData(v).value_or(VertexData{0, 0, Expression(), VertexType::X});
-        if (v_data.type != VertexType::Z || !v_data.phase.isProperClifford())
+                diag.getVData(v).value_or(VertexData{0, 0, PiExpression(), VertexType::X});
+        if (v_data.type != VertexType::Z || !isProperClifford(v_data.phase))
             return false;
 
         auto& edges = diag.incidentEdges(v);
@@ -74,14 +74,14 @@ namespace zx {
     }
 
     static bool isPauli(ZXDiagram& diag, Vertex v) {
-        return diag.phase(v).isPauli();
+        return isPauli(diag.phase(v));
     }
 
     bool checkPivotPauli(ZXDiagram& diag, Vertex v0, Vertex v1) {
         auto v0_data = diag.getVData(v0).value_or(
-                VertexData{0, 0, Expression(), VertexType::X});
+                VertexData{0, 0, PiExpression(), VertexType::X});
         auto v1_data = diag.getVData(v0).value_or(
-                VertexData{0, 0, Expression(), VertexType::X});
+                VertexData{0, 0, PiExpression(), VertexType::X});
 
         if (v0_data.type != VertexType::Z || // maybe problem if there is a self-loop?
             v1_data.type != VertexType::Z || !isPauli(diag, v0) ||
@@ -190,13 +190,13 @@ namespace zx {
         auto   v_data     = diag.getVData(v).value();
         Vertex phase_vert = diag.addVertex(v_data.qubit, -2, v_data.phase);
         Vertex id_vert    = diag.addVertex(v_data.qubit, -1);
-        diag.setPhase(v, Expression(PiRational(0, 1)));
+        diag.setPhase(v, PiExpression(PiRational(0, 1)));
         diag.addHadamardEdge(v, id_vert);
         diag.addHadamardEdge(id_vert, phase_vert);
     }
 
     static void extract_pauli_gadget(ZXDiagram& diag, Vertex v) {
-        if (diag.phase(v).isPauli())
+        if (isPauli(diag.phase(v)))
             return;
 
         extract_gadget(diag, v);
@@ -235,7 +235,7 @@ namespace zx {
                 continue;
 
             Vertex new_v =
-                    diag.addVertex(v_data.qubit, v_data.col, Expression(PiRational(0, 1)));
+                    diag.addVertex(v_data.qubit, v_data.col, PiExpression(PiRational(0, 1)));
             auto boundary_edge_type = type == zx::EdgeType::Simple ? zx::EdgeType::Hadamard : zx::EdgeType::Simple;
 
             diag.addEdge(v, new_v, EdgeType::Hadamard);
@@ -259,11 +259,11 @@ namespace zx {
     bool checkPivotGadget(ZXDiagram& diag, Vertex v0, Vertex v1) {
         auto p0 = diag.phase(v0);
         auto p1 = diag.phase(v1);
-        if (!p0.isPauli()) {
-            if (!p1.isPauli()) {
+        if (!isPauli(p0)) {
+            if (!isPauli(p1)) {
                 return false;
             }
-        } else if (p1.isPauli()) {
+        } else if (isPauli(p1)) {
             return false;
         }
         if (!is_interior(diag, v0) || !is_interior(diag, v1))
@@ -325,7 +325,7 @@ namespace zx {
                 continue;
 
             if (etype != zx::EdgeType::Hadamard || diag.isDeleted(n) ||
-                !diag.phase(n).isPauli() || diag.degree(n) != diag.degree(id0) ||
+                !isPauli(diag.phase(n)) || diag.degree(n) != diag.degree(id0) ||
                 diag.connected(n, id0)) {
                 continue;
             }
@@ -365,7 +365,7 @@ namespace zx {
 
         if (!diag.phase(id0).isZero()) {
             diag.setPhase(v, -diag.phase(v));
-            diag.setPhase(id0, Expression(PiRational(0, 1)));
+            diag.setPhase(id0, PiExpression(PiRational(0, 1)));
         }
         if (diag.phase(id1.value()).isZero())
             diag.addPhase(v, diag.phase(phase_spider.value()));

@@ -52,7 +52,8 @@ namespace zx {
         PiRational& operator/=(int64_t rhs);
 
         // double to_double() const;
-        [[nodiscard]] bool isInteger() const {
+        [[nodiscard]] bool
+        isInteger() const {
             return boost::multiprecision::denominator(frac) == 1;
         }
         [[nodiscard]] bool isZero() const {
@@ -79,6 +80,8 @@ namespace zx {
         [[nodiscard]] bool isCloseDivPi(double x, double tolerance) const {
             return std::abs(toDoubleDivPi() - x) < tolerance;
         }
+
+        explicit operator double() const { return this->toDouble(); }
 
     private:
         Rational frac;

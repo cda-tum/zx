@@ -29,7 +29,7 @@ namespace zx {
                                          EdgeType etype) { // TODO: Scalars
         if (from == to) {
             if (type(from) != VertexType::Boundary && etype == EdgeType::Hadamard) {
-                addPhase(from, Expression(PiRational(1, 1)));
+                addPhase(from, PiExpression(PiRational(1, 1)));
             }
             return;
         }
@@ -53,10 +53,10 @@ namespace zx {
                        etype == EdgeType::Simple) {
                 edge_it->type = EdgeType::Simple;
                 getEdgePtr(to, from)->toggle();
-                addPhase(from, Expression(PiRational(1, 1)));
+                addPhase(from, PiExpression(PiRational(1, 1)));
             } else if (edge_it->type == EdgeType::Simple &&
                        etype == EdgeType::Hadamard) {
-                addPhase(from, Expression(PiRational(1, 1)));
+                addPhase(from, PiExpression(PiRational(1, 1)));
             }
         } else {
             if (edge_it->type == EdgeType::Simple && etype == EdgeType::Simple) {
@@ -65,12 +65,12 @@ namespace zx {
                 nedges--;
             } else if (edge_it->type == EdgeType::Hadamard &&
                        etype == EdgeType::Simple) {
-                addPhase(from, Expression(PiRational(1, 1)));
+                addPhase(from, PiExpression(PiRational(1, 1)));
             } else if (edge_it->type == EdgeType::Simple &&
                        etype == EdgeType::Hadamard) {
                 edge_it->type = EdgeType::Hadamard;
                 getEdgePtr(to, from)->toggle();
-                addPhase(from, Expression(PiRational(1, 1)));
+                addPhase(from, PiExpression(PiRational(1, 1)));
             }
         }
     }
@@ -105,14 +105,14 @@ namespace zx {
         return nvertices - 1;
     }
 
-    Vertex ZXDiagram::addVertex(Qubit qubit, Col col, const Expression& phase,
+    Vertex ZXDiagram::addVertex(Qubit qubit, Col col, const PiExpression& phase,
                                 VertexType type) {
         return addVertex({col, qubit, phase, type});
     }
 
     void ZXDiagram::addQubit() {
-        auto in  = addVertex(static_cast<zx::Qubit>(getNQubits()) + 1, 0, Expression(), VertexType::Boundary);
-        auto out = addVertex(static_cast<zx::Qubit>(getNQubits()) + 1, 0, Expression(), VertexType::Boundary);
+        auto in  = addVertex(static_cast<zx::Qubit>(getNQubits()) + 1, 0, PiExpression(), VertexType::Boundary);
+        auto out = addVertex(static_cast<zx::Qubit>(getNQubits()) + 1, 0, PiExpression(), VertexType::Boundary);
         inputs.emplace_back(in);
         outputs.emplace_back(out);
     }
@@ -278,7 +278,7 @@ namespace zx {
 
         for (size_t i = 0; i < qubit_vertices.size(); i++) {
             auto v = addVertex(
-                    {1, static_cast<Qubit>(i), Expression(), VertexType::Boundary});
+                    {1, static_cast<Qubit>(i), PiExpression(), VertexType::Boundary});
             qubit_vertices[i] = v;
             inputs.push_back(v);
         }
@@ -290,7 +290,7 @@ namespace zx {
         for (Vertex v: qubit_vertices) {
             VertexData v_data = vertices[v].value();
             Vertex     new_v  = addVertex(
-                         {v_data.col + 1, v_data.qubit, Expression(), VertexType::Boundary});
+                         {v_data.col + 1, v_data.qubit, PiExpression(), VertexType::Boundary});
             addEdge(v, new_v);
             outputs.push_back(new_v);
         }
@@ -313,7 +313,7 @@ namespace zx {
     void ZXDiagram::approximateCliffords(fp tolerance) {
         for (auto& v: vertices) {
             if (v.has_value()) {
-                v.value().phase.roundToClifford(tolerance);
+                roundToClifford(v.value().phase, tolerance);
             }
         }
     }
