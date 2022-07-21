@@ -4,6 +4,9 @@
 #include "Rational.hpp"
 
 #include <cmath>
+#include <cstdint>
+#include <cstdlib>
+#include <ostream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -24,7 +27,7 @@ namespace zx {
         [[nodiscard]] Variable getVar() const { return var; }
         [[nodiscard]] double   getCoeff() const { return coeff; }
         [[nodiscard]] bool     hasZeroCoeff() const {
-                return std::abs(coeff) < TOLERANCE;
+            return std::abs(coeff) < TOLERANCE;
         }
 
         void addCoeff(double r);

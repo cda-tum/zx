@@ -11,7 +11,11 @@ using BigInt   = boost::multiprecision::cpp_int;
 #endif
 
 #include <cstdint>
+#include <cstdlib>
+#include <cmath>
 #include <iostream>
+#include <type_traits>
+#include <utility>
 
 namespace zx {
 
