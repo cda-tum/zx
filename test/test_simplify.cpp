@@ -241,6 +241,8 @@ TEST_F(SimplifyTest, interior_clifford_2) {
     EXPECT_FALSE(diag.isDeleted(2));
     EXPECT_FALSE(diag.isDeleted(4));
     EXPECT_TRUE(diag.isDeleted(3));
+    EXPECT_FALSE(diag.globalPhaseIsZero());
+    EXPECT_FALSE(diag.isIdentity());
 }
 
 TEST_F(SimplifyTest, non_pauli_pivot) {
@@ -269,6 +271,32 @@ TEST_F(SimplifyTest, non_pauli_pivot) {
     EXPECT_TRUE(diag.connected(6, 4));
     EXPECT_TRUE(diag.connected(5, 6));
     EXPECT_TRUE(diag.globalPhaseIsZero());
+}
+
+TEST_F(SimplifyTest, pauli_pivot_2) {
+    zx::ZXDiagram diag(1);
+    diag.removeEdge(0, 1);
+
+    diag.addVertex(0, 0, zx::Expression(zx::PiRational(1, 1))); // 2
+    diag.addVertex(0, 0, zx::Expression(zx::PiRational(1, 1))); // 3
+    diag.addVertex(0, 0, zx::Expression(zx::PiRational(1, 1))); // 4
+    diag.addVertex(0, 0, zx::Expression(zx::PiRational(1, 1))); // 5
+    diag.addEdge(0, 2);
+    diag.addEdge(2, 3, zx::EdgeType::Hadamard);
+    diag.addEdge(3, 4, zx::EdgeType::Hadamard);
+    diag.addEdge(4, 5, zx::EdgeType::Hadamard);
+    diag.addEdge(5, 1);
+
+    diag.toGraphlike();
+    auto res = zx::pivotPauliSimp(diag);
+
+    // EXPECT_TRUE(diag.connected(0, 7));
+    // EXPECT_TRUE(diag.connected(7, 4));
+    // EXPECT_TRUE(diag.connected(1, 4));
+    // EXPECT_TRUE(diag.connected(6, 4));
+    // EXPECT_TRUE(diag.connected(5, 6));
+    EXPECT_EQ(res, 1);
+    EXPECT_FALSE(diag.globalPhaseIsZero());
 }
 
 // TEST_F(SimplifyTest, clifford) {
@@ -420,7 +448,6 @@ TEST_F(SimplifyTest, fullReduce_2) {
 
     zx::fullReduce(diag);
     EXPECT_TRUE(diag.isIdentity());
-    EXPECT_TRUE(diag.globalPhaseIsZero());
 }
 
 TEST_F(SimplifyTest, fullReduceApprox) {
@@ -446,7 +473,6 @@ TEST_F(SimplifyTest, fullReduceApprox) {
 
     fullReduceApproximate(diag, 1e-7);
     EXPECT_TRUE(diag.isIdentity());
-    EXPECT_TRUE(diag.globalPhaseIsZero());
 }
 
 TEST_F(SimplifyTest, fullReduceNotApprox) {

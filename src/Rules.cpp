@@ -114,6 +114,11 @@ namespace zx {
         auto phase_v0 = diag.phase(v0);
         auto phase_v1 = diag.phase(v1);
 
+        std::cout << phase_v0.getConst() << std::endl;
+        std::cout << phase_v0.getConst() << std::endl;
+        if (!phase_v0.isZero() && !phase_v1.isZero())
+            diag.addGlobalPhase(PiRational(1, 1));
+
         auto& edges_v0 = diag.incidentEdges(v0);
         auto& edges_v1 = diag.incidentEdges(v1);
 
@@ -133,9 +138,6 @@ namespace zx {
         for (auto& [neighbor_v1, _]: edges_v1) {
             diag.addPhase(neighbor_v1, phase_v0);
         }
-
-        if (!phase_v0.isZero() && !phase_v1.isZero())
-            diag.addGlobalPhase(PiRational(1, 1));
 
         diag.removeVertex(v0);
         diag.removeVertex(v1);
