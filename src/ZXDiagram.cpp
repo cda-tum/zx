@@ -259,6 +259,7 @@ namespace zx {
             outputs[i] = new_vs[rhs.outputs[i]];
         }
 
+        this->addGlobalPhase(-rhs.globalPhase);
         return *this;
     }
 
