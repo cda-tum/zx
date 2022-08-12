@@ -70,6 +70,7 @@ namespace zx {
                 diag.addEdgeParallelAware(n0, n1, EdgeType::Hadamard);
             }
         }
+        diag.addGlobalPhase(PiRational{diag.phase(v).getConst().getNum(), 4});
         diag.removeVertex(v);
     }
 
@@ -132,6 +133,9 @@ namespace zx {
         for (auto& [neighbor_v1, _]: edges_v1) {
             diag.addPhase(neighbor_v1, phase_v0);
         }
+
+        if (!phase_v0.isZero() && !phase_v1.isZero())
+            diag.addGlobalPhase(PiRational(1, 1));
 
         diag.removeVertex(v0);
         diag.removeVertex(v1);
