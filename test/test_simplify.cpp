@@ -276,10 +276,10 @@ TEST_F(SimplifyTest, pauli_pivot_2) {
     zx::ZXDiagram diag(1);
     diag.removeEdge(0, 1);
 
-    diag.addVertex(0, 0, zx::Expression(zx::PiRational(1, 1))); // 2
-    diag.addVertex(0, 0, zx::Expression(zx::PiRational(1, 1))); // 3
-    diag.addVertex(0, 0, zx::Expression(zx::PiRational(1, 1))); // 4
-    diag.addVertex(0, 0, zx::Expression(zx::PiRational(1, 1))); // 5
+    diag.addVertex(0, 0, zx::PiExpression(zx::PiRational(1, 1))); // 2
+    diag.addVertex(0, 0, zx::PiExpression(zx::PiRational(1, 1))); // 3
+    diag.addVertex(0, 0, zx::PiExpression(zx::PiRational(1, 1))); // 4
+    diag.addVertex(0, 0, zx::PiExpression(zx::PiRational(1, 1))); // 5
     diag.addEdge(0, 2);
     diag.addEdge(2, 3, zx::EdgeType::Hadamard);
     diag.addEdge(3, 4, zx::EdgeType::Hadamard);

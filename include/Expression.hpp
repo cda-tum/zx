@@ -10,6 +10,7 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+#include <numeric>
 
 namespace sym {
     static constexpr double TOLERANCE = 1e-9;
