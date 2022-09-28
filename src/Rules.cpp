@@ -1,11 +1,13 @@
 #include "Rules.hpp"
 
 #include "Definitions.hpp"
+#include "Expression.hpp"
 #include "Rational.hpp"
+#include "Utils.hpp"
 #include "ZXDiagram.hpp"
 
 #include <algorithm>
-#include <iostream>
+#include <cstddef>
 #include <optional>
 
 namespace zx {
@@ -70,6 +72,7 @@ namespace zx {
                 diag.addEdgeParallelAware(n0, n1, EdgeType::Hadamard);
             }
         }
+        diag.addGlobalPhase(PiRational{diag.phase(v).getConst().getNum(), 4});
         diag.removeVertex(v);
     }
 
@@ -112,6 +115,9 @@ namespace zx {
 
         auto phase_v0 = diag.phase(v0);
         auto phase_v1 = diag.phase(v1);
+
+        if (!phase_v0.isZero() && !phase_v1.isZero())
+            diag.addGlobalPhase(PiRational(1, 1));
 
         auto& edges_v0 = diag.incidentEdges(v0);
         auto& edges_v1 = diag.incidentEdges(v1);

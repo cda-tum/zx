@@ -2,11 +2,9 @@
 
 #include <algorithm>
 #include <cmath>
-#include <cstddef>
-#include <exception>
-#include <numeric>
+#include <cstdint>
+#include <cstdlib>
 #include <ostream>
-#include <stdexcept>
 #include <string>
 #include <type_traits>
 #include <unordered_map>

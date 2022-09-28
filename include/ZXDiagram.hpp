@@ -2,17 +2,11 @@
 
 #include "Definitions.hpp"
 #include "Expression.hpp"
-#include "Rational.hpp"
 #include "Utils.hpp"
 
-#include <algorithm>
 #include <cstddef>
-#include <cstdint>
-#include <memory>
-#include <numeric>
 #include <optional>
 #include <string>
-#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -127,14 +121,23 @@ namespace zx {
 
         void removeDisconnectedSpiders();
 
+        void                     addGlobalPhase(const PiRational& phase);
+        [[nodiscard]] PiRational getGlobalPhase() const {
+            return globalPhase;
+        }
+        [[nodiscard]] bool globalPhaseIsZero() const {
+            return globalPhase.isZero();
+        }
+
     private:
         std::vector<std::vector<Edge>>         edges;
         std::vector<std::optional<VertexData>> vertices;
         std::vector<Vertex>                    deleted;
         std::vector<Vertex>                    inputs;
         std::vector<Vertex>                    outputs;
-        std::size_t                            nvertices = 0;
-        std::size_t                            nedges    = 0;
+        std::size_t                            nvertices   = 0;
+        std::size_t                            nedges      = 0;
+        PiRational                             globalPhase = PiRational{};
 
         std::vector<Vertex> initGraph(std::size_t nqubits);
         void                closeGraph(std::vector<Vertex>& qubit_vertices);
