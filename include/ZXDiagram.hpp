@@ -121,8 +121,8 @@ namespace zx {
 
         void removeDisconnectedSpiders();
 
-        void                     addGlobalPhase(const PiRational& phase);
-        [[nodiscard]] PiRational getGlobalPhase() const {
+        void                       addGlobalPhase(const PiExpression& phase);
+        [[nodiscard]] PiExpression getGlobalPhase() const {
             return globalPhase;
         }
         [[nodiscard]] bool globalPhaseIsZero() const {
@@ -137,7 +137,7 @@ namespace zx {
         std::vector<Vertex>                    outputs;
         std::size_t                            nvertices   = 0;
         std::size_t                            nedges      = 0;
-        PiRational                             globalPhase = PiRational{};
+        PiExpression globalPhase                                        = {};
 
         std::vector<Vertex> initGraph(std::size_t nqubits);
         void                closeGraph(std::vector<Vertex>& qubit_vertices);

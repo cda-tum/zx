@@ -346,7 +346,7 @@ namespace zx {
         }
     }
 
-    void ZXDiagram::addGlobalPhase(const PiRational& phase) {
+    void ZXDiagram::addGlobalPhase(const PiExpression& phase) {
         globalPhase += phase;
     }
 
