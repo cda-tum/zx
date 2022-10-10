@@ -4,13 +4,13 @@
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
+#include <numeric>
 #include <ostream>
 #include <string>
 #include <type_traits>
 #include <unordered_map>
 #include <utility>
 #include <vector>
-#include <numeric>
 
 namespace sym {
     static constexpr double TOLERANCE = 1e-9;
@@ -75,7 +75,7 @@ namespace sym {
         [[nodiscard]] Variable getVar() const { return var; }
         [[nodiscard]] T        getCoeff() const { return coeff; }
         [[nodiscard]] bool     hasZeroCoeff() const {
-                return std::abs(static_cast<double>(coeff)) < TOLERANCE;
+            return std::abs(static_cast<double>(coeff)) < TOLERANCE;
         }
 
         Term(T coeff, Variable var):
