@@ -287,8 +287,10 @@ namespace zx {
     void ZXDiagram::closeGraph(std::vector<Vertex>& qubit_vertices) {
         for (Vertex v: qubit_vertices) {
             VertexData v_data = vertices[v].value();
-            Vertex     new_v  = addVertex(
-                    {v_data.col + 1, v_data.qubit, PiExpression(), VertexType::Boundary});
+            Vertex     new_v  = addVertex({v_data.col + 1,
+                                           v_data.qubit,
+                                           PiExpression(),
+                                           VertexType::Boundary});
             addEdge(v, new_v);
             outputs.push_back(new_v);
         }

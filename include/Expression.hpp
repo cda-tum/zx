@@ -74,9 +74,7 @@ namespace sym {
     public:
         [[nodiscard]] Variable getVar() const { return var; }
         [[nodiscard]] T        getCoeff() const { return coeff; }
-        [[nodiscard]] bool     hasZeroCoeff() const {
-            return std::abs(static_cast<double>(coeff)) < TOLERANCE;
-        }
+        [[nodiscard]] bool     hasZeroCoeff() const { return std::abs(static_cast<double>(coeff)) < TOLERANCE; }
 
         Term(T coeff, Variable var):
             coeff(coeff), var(var){};
