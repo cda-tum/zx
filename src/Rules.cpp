@@ -117,7 +117,7 @@ namespace zx {
         auto phase_v1 = diag.phase(v1);
 
         if (!phase_v0.isZero() && !phase_v1.isZero())
-          diag.addGlobalPhase(PiExpression(PiRational(1,1)));
+            diag.addGlobalPhase(PiExpression(PiRational(1, 1)));
 
         auto& edges_v0 = diag.incidentEdges(v0);
         auto& edges_v1 = diag.incidentEdges(v1);
