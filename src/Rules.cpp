@@ -318,8 +318,8 @@ namespace zx {
                 continue;
             }
 
-            foundGadget  = true;
-            id1          = n;
+            foundGadget = true;
+            id1         = n;
 
             for (const auto& [nn, nnEtype]:
                  diag.incidentEdges(id1.value())) { // Todo: maybe problem with parallel edge?
@@ -331,8 +331,8 @@ namespace zx {
                 }
 
                 if (diag.degree(nn) == 1 && !diag.isBoundaryVertex(nn)) {
-                    foundGadget  = true;
-                    phaseSpider  = nn;
+                    foundGadget = true;
+                    phaseSpider = nn;
                     continue;
                 }
 
