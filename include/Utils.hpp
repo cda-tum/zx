@@ -16,10 +16,14 @@ namespace zx {
         EdgeType type;
 
         Edge() = default;
-        Edge(Vertex to, EdgeType type):
+        Edge(const Vertex to, const EdgeType type):
             to(to), type(type){};
         void toggle() {
-            type = (type == EdgeType::Simple) ? EdgeType::Hadamard : EdgeType::Simple;
+            if (type == EdgeType::Simple) {
+                type = EdgeType::Hadamard;
+            } else {
+                type = EdgeType::Simple;
+            }
         }
     };
 
@@ -46,7 +50,7 @@ namespace zx {
 
             explicit VertexIterator(std::vector<std::optional<VertexData>>& vertices):
                 currentPos(vertices.begin()), vertices(vertices) {
-                next_valid_vertex();
+                nextValidVertex();
             }
             VertexIterator(std::vector<std::optional<VertexData>>& vertices,
                            Vertex                                  v);
@@ -70,7 +74,7 @@ namespace zx {
             std::vector<std::optional<VertexData>>::iterator currentPos;
             std::vector<std::optional<VertexData>>&          vertices;
 
-            void next_valid_vertex();
+            void nextValidVertex();
         };
 
         using iterator = VertexIterator;
