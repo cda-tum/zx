@@ -39,10 +39,10 @@ namespace zx {
         [[nodiscard]] std::size_t getNEdges() const { return nedges; }
         [[nodiscard]] std::size_t getNQubits() const { return inputs.size(); }
 
-        [[nodiscard]] bool                connected(Vertex from, Vertex to) const;
-        [[nodiscard]] std::optional<Edge> getEdge(Vertex from, Vertex to) const;
-        [[nodiscard]] std::vector<Edge>&  incidentEdges(Vertex v) { return edges[v]; }
-        [[nodiscard]] const Edge&         incidentEdge(Vertex v, std::size_t n) { return edges[v][n]; }
+        [[nodiscard]] bool                     connected(Vertex from, Vertex to) const;
+        [[nodiscard]] std::optional<Edge>      getEdge(Vertex from, Vertex to) const;
+        [[nodiscard]] const std::vector<Edge>& incidentEdges(const Vertex v) const { return edges[v]; }
+        [[nodiscard]] const Edge&              incidentEdge(const Vertex v, const std::size_t n) { return edges[v][n]; }
 
         [[nodiscard]] std::size_t degree(Vertex v) const { return edges[v].size(); }
 
