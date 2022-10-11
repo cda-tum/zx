@@ -30,10 +30,6 @@ namespace zx {
         modPi();
     }
 
-    // double PiRational::to_double() const {
-    //   return zx::PI * (static_cast<float>(num)) / denom;
-    // }
-
     PiRational& PiRational::operator+=(const PiRational& rhs) {
         frac += rhs.frac;
         modPi();

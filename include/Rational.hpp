@@ -25,7 +25,6 @@ namespace zx {
  * corresponding to the interval (-pi, pi]
  */
     class PiRational {
-        // void normalize();
     public:
         PiRational():
             frac(){};
@@ -55,7 +54,6 @@ namespace zx {
         PiRational& operator/=(const PiRational& rhs);
         PiRational& operator/=(int64_t rhs);
 
-        // double to_double() const;
         [[nodiscard]] bool
         isInteger() const {
             return boost::multiprecision::denominator(frac) == 1;
