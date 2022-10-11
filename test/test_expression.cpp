@@ -1,7 +1,6 @@
 #include "Expression.hpp"
 #include "Rational.hpp"
 #include "Utils.hpp"
-#include "ZXDiagram.hpp"
 
 #include <gtest/gtest.h>
 #include <stdexcept>
@@ -9,16 +8,9 @@
 
 class ExpressionTest: public ::testing::Test {
 public:
-    // const sym::Variable x_var{0, "x"};
-    // const sym::Variable y_var{1, "y"};
-    // const sym::Variable z_var{2, "z"};
-
     sym::Term<double> x{1.0, sym::Variable("x")};
     sym::Term<double> y{sym::Variable("y")};
     sym::Term<double> z{sym::Variable("z")};
-
-protected:
-    virtual void SetUp() {}
 };
 
 TEST_F(ExpressionTest, basic_ops_1) {
@@ -27,7 +19,7 @@ TEST_F(ExpressionTest, basic_ops_1) {
     EXPECT_EQ(1, e.numTerms());
     EXPECT_EQ(zx::PiRational(0, 1), e.getConst());
 
-    e += x; // sym::Term(x);
+    e += x;
 
     EXPECT_EQ(1, e.numTerms());
     EXPECT_EQ(zx::PiRational(0, 1), e.getConst());
@@ -104,8 +96,8 @@ TEST_F(ExpressionTest, div) {
 }
 
 TEST_F(ExpressionTest, Commutativity) {
-    sym::Expression<double, double> e1(x, y);
-    sym::Expression<double, double> e2(z);
+    const sym::Expression<double, double> e1(x, y);
+    sym::Expression<double, double>       e2(z);
     e2.setConst(1.0);
 
     EXPECT_EQ(e1 + e2, e2 + e1);
@@ -113,22 +105,22 @@ TEST_F(ExpressionTest, Commutativity) {
 }
 
 TEST_F(ExpressionTest, Associativity) {
-    sym::Expression<double, double> e1(x, y);
-    sym::Expression<double, double> e2(z);
-    sym::Expression<double, double> e3(1.0);
+    const sym::Expression<double, double> e1(x, y);
+    const sym::Expression<double, double> e2(z);
+    const sym::Expression<double, double> e3(1.0);
 
     EXPECT_EQ(e1 + (e2 + e3), (e1 + e2) + e3);
     EXPECT_EQ(e1 * (2.0 * 4.0), (e1 * 2.0) * 4.0);
 }
 
 TEST_F(ExpressionTest, Distributive) {
-    sym::Expression<double, double> e1(x, y);
-    sym::Expression<double, double> e2(z);
+    const sym::Expression<double, double> e1(x, y);
+    const sym::Expression<double, double> e2(z);
 
     EXPECT_EQ((e1 + e2) * 2.0, (e1 * 2.0) + (e2 * 2.0));
     EXPECT_EQ((e1 - e2) * 2.0, (e1 * 2.0) - (e2 * 2.0));
-    std::cout << (e1 + e2) / 2.0 << std::endl;
-    std::cout << (e1 / 2.0) + (e2 / 2.0) << std::endl;
+    std::cout << ((e1 + e2) / 2.0) << "\n";
+    std::cout << ((e1 / 2.0) + (e2 / 2.0)) << "\n";
     EXPECT_EQ((e1 + e2) / 2.0, (e1 / 2.0) + (e2 / 2.0));
     EXPECT_EQ((e1 - e2) / 2.0, (e1 / 2.0) - (e2 / 2.0));
 }
@@ -141,8 +133,8 @@ TEST_F(ExpressionTest, Variable) {
 }
 
 TEST_F(ExpressionTest, SumNegation) {
-    sym::Expression<double, double> e1(x, y);
-    sym::Expression<double, double> e2(z, y);
+    const sym::Expression<double, double> e1(x, y);
+    const sym::Expression<double, double> e2(z, y);
 
     EXPECT_EQ(e1 - e2, e1 + (-e2));
     const auto& zero = sym::Expression<double, double>{};
@@ -150,19 +142,19 @@ TEST_F(ExpressionTest, SumNegation) {
 }
 
 TEST_F(ExpressionTest, SumMult) {
-    sym::Expression<double, double> e1(x, y);
+    const sym::Expression<double, double> e1(x, y);
     EXPECT_EQ(e1 + e1, e1 * 2.0);
 }
 
 TEST_F(ExpressionTest, CliffordRounding) {
-    double           eps = 1e-14;
+    const double     eps = 1e-14;
     zx::PiExpression e{zx::PiRational(zx::PI - eps)};
     zx::roundToClifford(e, 1e-9);
     EXPECT_EQ(e, zx::PiExpression(zx::PiRational(1, 1)));
-    e = zx::PiExpression{zx::PiRational(zx::PI / 2 - eps)};
+    e = zx::PiExpression{zx::PiRational((zx::PI / 2) - eps)};
     zx::roundToClifford(e, 1e-9);
     EXPECT_EQ(e, zx::PiExpression(zx::PiRational(1, 2)));
-    e = zx::PiExpression{zx::PiRational(-zx::PI / 2 - eps)};
+    e = zx::PiExpression{zx::PiRational((-zx::PI / 2) - eps)};
     zx::roundToClifford(e, 1e-9);
     EXPECT_EQ(e, zx::PiExpression(zx::PiRational(-1, 2)));
 }
@@ -186,8 +178,8 @@ TEST_F(ExpressionTest, Clifford) {
 }
 
 TEST_F(ExpressionTest, Convertability) {
-    sym::Expression<double, double> e({x, y}, zx::PI);
-    auto                            piE = e.convert<zx::PiRational>();
+    const sym::Expression<double, double> e({x, y}, zx::PI);
+    const auto                            piE = e.convert<zx::PiRational>();
 
     EXPECT_EQ(piE, zx::PiExpression({x, y}, zx::PiRational(1, 1)));
 }
@@ -195,7 +187,7 @@ TEST_F(ExpressionTest, Convertability) {
 TEST_F(ExpressionTest, Instantiation) {
     sym::Expression<double, double> e(2 * x, y);
 
-    sym::VariableAssignment assignment{
+    const sym::VariableAssignment assignment{
             {sym::Variable{"x"}, 2.0}, {sym::Variable{"y"}, 1.0}};
 
     EXPECT_PRED_FORMAT2(testing::FloatLE, e.evaluate(assignment), 5.0);
