@@ -1,7 +1,6 @@
 #include "Expression.hpp"
 
 #include <algorithm>
-#include <cmath>
 #include <cstddef>
 #include <string>
 
@@ -11,14 +10,14 @@ namespace sym {
     std::size_t                                  Variable::nextId;
 
     Variable::Variable(const std::string& name) {
-        auto it = registered.find(name);
+        const auto it = registered.find(name);
         if (it != registered.end()) {
             id = it->second;
         } else {
             registered[name] = nextId;
             names[nextId]    = name;
             id               = nextId;
-            nextId++;
+            ++nextId;
         }
     }
 
