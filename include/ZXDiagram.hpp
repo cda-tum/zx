@@ -14,16 +14,15 @@ namespace zx {
     class ZXDiagram {
     public:
         ZXDiagram() = default;
-        explicit ZXDiagram(std::size_t nqubits); // create n_qubit identity_diagram
-        explicit ZXDiagram(std::string filename);
-        // explicit ZXDiagram(const qc::QuantumComputation &circuit);
+        // create n_qubit identity_diagram
+        explicit ZXDiagram(std::size_t nqubits);
 
         void addEdge(Vertex from, Vertex to, EdgeType type = EdgeType::Simple);
-        void addHadamardEdge(Vertex from, Vertex to) {
+        void addHadamardEdge(const Vertex from, const Vertex to) {
             addEdge(from, to, EdgeType::Hadamard);
         };
         void addEdgeParallelAware(Vertex from, Vertex to,
-                                  EdgeType type = EdgeType::Simple);
+                                  EdgeType eType = EdgeType::Simple);
         void removeEdge(Vertex from, Vertex to);
 
         Vertex addVertex(const VertexData& data);
@@ -32,7 +31,7 @@ namespace zx {
                          VertexType          type  = VertexType::Z);
         void   addQubit();
         void   addQubits(zx::Qubit n);
-        void   removeVertex(Vertex to_remove);
+        void   removeVertex(Vertex toRemove);
 
         [[nodiscard]] std::size_t getNdeleted() const { return deleted.size(); }
         [[nodiscard]] std::size_t getNVertices() const { return nvertices; }
@@ -44,21 +43,21 @@ namespace zx {
         [[nodiscard]] const std::vector<Edge>& incidentEdges(const Vertex v) const { return edges[v]; }
         [[nodiscard]] const Edge&              incidentEdge(const Vertex v, const std::size_t n) { return edges[v][n]; }
 
-        [[nodiscard]] std::size_t degree(Vertex v) const { return edges[v].size(); }
+        [[nodiscard]] std::size_t degree(const Vertex v) const { return edges[v].size(); }
 
-        [[nodiscard]] const PiExpression& phase(Vertex v) const {
+        [[nodiscard]] const PiExpression& phase(const Vertex v) const {
             return vertices[v].value().phase;
         }
 
-        [[nodiscard]] Qubit qubit(Vertex v) const {
+        [[nodiscard]] Qubit qubit(const Vertex v) const {
             return vertices[v].value().qubit;
         }
 
-        [[nodiscard]] VertexType type(Vertex v) const {
+        [[nodiscard]] VertexType type(const Vertex v) const {
             return vertices[v].value().type;
         }
 
-        [[nodiscard]] std::optional<VertexData> getVData(Vertex v) const {
+        [[nodiscard]] std::optional<VertexData> getVData(const Vertex v) const {
             return vertices[v];
         }
 
@@ -68,34 +67,34 @@ namespace zx {
         [[nodiscard]] const std::vector<Vertex>& getInputs() const {
             return inputs;
         }
-        [[nodiscard]] Vertex getInput(std::size_t i) const { return inputs[i]; }
+        [[nodiscard]] Vertex getInput(const std::size_t i) const { return inputs[i]; }
 
         [[nodiscard]] const std::vector<Vertex>& getOutputs() const {
             return outputs;
         }
 
-        [[nodiscard]] Vertex getOutput(std::size_t i) const { return outputs[i]; }
+        [[nodiscard]] Vertex getOutput(const std::size_t i) const { return outputs[i]; }
 
-        [[nodiscard]] bool isDeleted(Vertex v) const {
+        [[nodiscard]] bool isDeleted(const Vertex v) const {
             return !vertices[v].has_value();
         }
 
-        [[nodiscard]] bool isBoundaryVertex(Vertex v) const {
+        [[nodiscard]] bool isBoundaryVertex(const Vertex v) const {
             return vertices[v].value().type == VertexType::Boundary;
         }
 
         [[nodiscard]] bool isInput(Vertex v) const;
         [[nodiscard]] bool isOutput(Vertex v) const;
 
-        void addPhase(Vertex v, const PiExpression& phase) {
+        void addPhase(const Vertex v, const PiExpression& phase) {
             vertices[v].value().phase += phase;
         }
 
-        void setPhase(Vertex v, const PiExpression& phase) {
+        void setPhase(const Vertex v, const PiExpression& phase) {
             vertices[v].value().phase = phase;
         }
 
-        void setType(Vertex v, VertexType type) {
+        void setType(const Vertex v, const VertexType type) {
             vertices[v].value().type = type;
         }
 
@@ -136,7 +135,7 @@ namespace zx {
         PiExpression                           globalPhase = {};
 
         std::vector<Vertex> initGraph(std::size_t nqubits);
-        void                closeGraph(std::vector<Vertex>& qubit_vertices);
+        void                closeGraph(const std::vector<Vertex>& qubitVertices);
 
         void removeHalfEdge(Vertex from, Vertex to);
 
