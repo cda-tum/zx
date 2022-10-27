@@ -5,6 +5,7 @@
 #include "Utils.hpp"
 
 #include <cstddef>
+#include <cstdint>
 #include <optional>
 #include <string>
 #include <utility>
@@ -124,6 +125,9 @@ namespace zx {
             return globalPhase.isZero();
         }
 
+        //implements the polynomial algorithm for finding a maximally delayed g-flow from https://arxiv.org/pdf/0709.2670.pdf
+        [[nodiscard]] std::optional<std::vector<std::uint32_t>> gFlow();
+
     private:
         std::vector<std::vector<Edge>>         edges;
         std::vector<std::optional<VertexData>> vertices;
@@ -140,5 +144,15 @@ namespace zx {
         void removeHalfEdge(Vertex from, Vertex to);
 
         std::vector<Edge>::iterator getEdgePtr(Vertex from, Vertex to);
+
+        // void gFlowAux(const gf2Mat& adjMat, std::vector<Vertex> in) const;
+        gf2Mat              getAdjMat();
+        std::vector<Vertex> getNonOutputs(const std::vector<Vertex>& out) const;
+
+        static bool isIn(const Vertex& v, const std::vector<Vertex>& vertices);
+
+        gf2Mat constructLinearSystem(const gf2Mat& adjMat, std::vector<Vertex> out, std::vector<Vertex> out_prime, std::vector<Vertex> us) const;
+
+        std::vector<Vertex> solutionFromTriangular(const gf2Mat& triu, const std::vector<Vertex>& us, std::size_t offset, std::vector<std::vector<Vertex>>& g) const;
     };
 } // namespace zx

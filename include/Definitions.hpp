@@ -3,6 +3,7 @@
 #include "Expression.hpp"
 #include "Rational.hpp"
 
+#include <flint/nmod_matxx.h>
 #include <stdexcept>
 #include <string>
 
@@ -36,4 +37,7 @@ namespace zx {
             return msg.c_str();
         }
     };
+
+    using gf2Mat = std::vector<std::vector<bool>>;
+    using gf2Vec = std::vector<bool>;
 } // namespace zx

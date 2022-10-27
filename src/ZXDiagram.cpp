@@ -6,6 +6,8 @@
 #include "Utils.hpp"
 
 #include <algorithm>
+#include <cstdint>
+#include <numeric>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -369,4 +371,100 @@ namespace zx {
         globalPhase += phase;
     }
 
+    [[nodiscard]] std::optional<std::vector<std::uint32_t>> ZXDiagram::gFlow() {
+        // TODO : check if diagram is graph-like
+        std::vector<uint32_t>            partOrd(nvertices, 0U); //TODO: technically only the outputs are init to 0
+        std::vector<std::vector<Vertex>> g(nvertices);
+        const auto&                      adjMat = getAdjMat();
+        std::vector<Vertex>              out_prime;
+        std::vector<Vertex>              c;
+        std::vector<Vertex>              out = outputs;
+
+        do {
+            for (const auto& v: outputs) {
+                if (std::find(inputs.begin(), inputs.end(), v) == inputs.end())
+                    out_prime.emplace_back(v);
+            }
+            std::vector<Vertex> us = getNonOutputs(out);
+
+            auto system = constructLinearSystem(adjMat, out, out_prime, us);
+
+            auto systemFlint = getFlintMatrix(system);
+            systemFlint.set_rref(); // bring to upper triangular form
+            c = solutionFromTriangular(getMatrixFromFlint(systemFlint), us, out_prime.size(), g);
+        } while (!c.empty());
+
+        return partOrd;
+    }
+
+    gf2Mat ZXDiagram::getAdjMat() {
+        gf2Mat adjMat{nvertices, gf2Vec(nvertices, false)};
+        for (const auto& [from, to]: getEdges()) {
+            adjMat[from][to] = true;
+            adjMat[to][from] = true;
+        }
+        return adjMat;
+    }
+
+    std::vector<Vertex> ZXDiagram::getNonOutputs(const std::vector<Vertex>& out) const {
+        std::vector<Vertex> nonOuts;
+        for (Vertex i = 0; i < vertices.size(); ++i) {
+            if (vertices[i].has_value() && isIn(i, out))
+                nonOuts.emplace_back(i);
+        }
+        return nonOuts;
+    }
+
+    bool ZXDiagram::isIn(const Vertex& v, const std::vector<Vertex>& vertices) {
+        return std::find(vertices.begin(), vertices.end(), v) != vertices.end();
+    }
+
+    gf2Mat ZXDiagram::constructLinearSystem(const gf2Mat& adjMat, std::vector<Vertex> out, std::vector<Vertex> out_prime, std::vector<Vertex> us) const {
+        gf2Mat system(nvertices - out.size(), gf2Vec(nvertices, false));
+
+        for (std::size_t row = 0; row < us.size(); ++row) {
+            for (std::size_t col = 0; col < out_prime.size(); ++col) {
+                system[row][row] = adjMat[us[row]][out_prime[col]];
+            }
+        }
+
+        for (std::size_t curr_col = out_prime.size(); curr_col < nvertices; ++curr_col) {
+            auto idx              = us[curr_col - out_prime.size()];
+            system[idx][curr_col] = true;
+        }
+
+        return system;
+    }
+
+    std::vector<Vertex> ZXDiagram::solutionFromTriangular(const gf2Mat& triu, const std::vector<Vertex>& us, std::size_t offset, std::vector<std::vector<Vertex>>& g) const {
+        for (std::size_t col = offset; col < nvertices; ++col) {
+            gf2Vec      sol(triu.size(), false);
+            std::size_t maxNonZeroRow = 0;
+            for (std::size_t i = 0; i < offset; ++i) {
+                if (triu[offset - i][offset - i]) {
+                    maxNonZeroRow = offset - i;
+                    break;
+                }
+            }
+
+            //backpropagation
+            for (std::size_t col = offset; col < triu[0].size(); ++col) {
+                bool hasSol = true;
+                for (std::size_t row = triu.size(); row > maxNonZeroRow; --row) {
+                    if (triu[row][col]) {
+                        hasSol = false;
+                        break;
+                    }
+                }
+                if (!hasSol)
+                    continue;
+
+                // TODO: replace by bitwise ops
+                for (std::size_t row_comp = 0; row_comp < offset; ++row_comp) {
+                    auto row     = offset - row_comp - 1; //TODO
+                    int  par_lhs = std::accumulate(trio[row][row].begin() +)
+                }
+            }
+        }
+    }
 } // namespace zx
