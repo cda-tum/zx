@@ -72,5 +72,8 @@ if (COVERAGE)
 	target_link_libraries(${PROJECT_NAME} PUBLIC --coverage)
 endif ()
 
+find_package(FLINT REQUIRED)
+target_link_libraries(${PROJECT_NAME} PUBLIC flint)
+
 # add MQT alias
 add_library(MQT::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
