@@ -196,9 +196,6 @@ TEST_F(ZXDiagramTest, ancilla) {
     zx::fullReduce(cx);
 
     EXPECT_EQ(cx.getNEdges(), 1);
-    for (const auto& [v, data]: cx.getVertices()) {
-        std::cout << v << " " << (data.type == zx::VertexType::Boundary) << "\n";
-    }
     EXPECT_EQ(cx.getNVertices(), 2);
     EXPECT_TRUE(cx.isIdentity());
 }
@@ -216,4 +213,54 @@ TEST_F(ZXDiagramTest, RemoveScalarSubDiagram) {
     EXPECT_EQ(idWithScal.getNEdges(), 1);
     EXPECT_TRUE(idWithScal.isDeleted(v));
     EXPECT_TRUE(idWithScal.isDeleted(w));
+}
+
+static zx::ZXDiagram makeIdentityDiagram(const std::size_t nqubits,
+                                         const std::size_t spidersPerQubit) {
+    zx::ZXDiagram           diag(nqubits);
+    std::vector<zx::Vertex> rightmostVertices = diag.getInputs();
+
+    for (std::size_t i = 0; i < nqubits; ++i) {
+        diag.removeEdge(i, i + nqubits);
+    }
+
+    // add identity spiders
+    for (zx::Qubit qubit = 0; static_cast<std::size_t>(qubit) < nqubits; ++qubit) {
+        for (std::size_t j = 0; j < spidersPerQubit; ++j) {
+            const zx::Vertex v = diag.addVertex(qubit);
+            diag.addEdge(rightmostVertices[qubit], v);
+            rightmostVertices[qubit] = v;
+        }
+    }
+
+    for (std::size_t qubit = 0; qubit < nqubits; ++qubit) {
+        diag.addEdge(rightmostVertices[qubit], qubit + nqubits);
+    }
+
+    return diag;
+}
+
+TEST_F(ZXDiagramTest, testOutputs) {
+    zx::ZXDiagram linear    = makeIdentityDiagram(1, 3);
+    const auto&   inSpiders = linear.getInputSpiders();
+    EXPECT_EQ(inSpiders.size(), 1);
+    EXPECT_EQ(inSpiders[0], 2);
+
+    const auto& outSpiders = linear.getOutputSpiders();
+    EXPECT_EQ(outSpiders.size(), 1);
+    EXPECT_EQ(outSpiders[0], 4);
+}
+
+TEST_F(ZXDiagramTest, testGFlow) {
+    zx::ZXDiagram linear   = makeIdentityDiagram(1, 3);
+    const auto&   gFlowOpt = linear.computeGFlow();
+    if (gFlowOpt.has_value()) {
+        const auto& [ord, g] = gFlowOpt.value();
+
+        for (const auto& [v, _]: linear.getVertices()) {
+            std::cout << "correcting " << v << " on vertices: ";
+            for (const auto& cv: g[v]) std::cout << cv << ", ";
+            std::cout << std::endl;
+        }
+    }
 }

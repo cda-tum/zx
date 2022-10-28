@@ -33,7 +33,7 @@ endmacro()
 # add unit tests
 package_add_test(${PROJECT_NAME}_test
   ${CMAKE_CURRENT_SOURCE_DIR}/test_zx.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/test_rational.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/test_expression.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/test_simplify.cpp
+  # ${CMAKE_CURRENT_SOURCE_DIR}/test_rational.cpp
+  # ${CMAKE_CURRENT_SOURCE_DIR}/test_expression.cpp
+  # ${CMAKE_CURRENT_SOURCE_DIR}/test_simplify.cpp
 )

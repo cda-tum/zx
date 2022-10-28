@@ -40,4 +40,6 @@ namespace zx {
 
     using gf2Mat = std::vector<std::vector<bool>>;
     using gf2Vec = std::vector<bool>;
+
+    using gFlow = std::pair<std::vector<uint32_t>, std::vector<std::vector<Vertex>>>;
 } // namespace zx

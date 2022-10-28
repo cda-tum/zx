@@ -6,6 +6,7 @@
 #include "Utils.hpp"
 
 #include <algorithm>
+#include <cstddef>
 #include <cstdint>
 #include <numeric>
 #include <unordered_map>
@@ -371,30 +372,79 @@ namespace zx {
         globalPhase += phase;
     }
 
-    [[nodiscard]] std::optional<std::vector<std::uint32_t>> ZXDiagram::gFlow() {
+    [[nodiscard]] std::optional<gFlow> ZXDiagram::computeGFlow() {
         // TODO : check if diagram is graph-like
         std::vector<uint32_t>            partOrd(nvertices, 0U); //TODO: technically only the outputs are init to 0
         std::vector<std::vector<Vertex>> g(nvertices);
         const auto&                      adjMat = getAdjMat();
-        std::vector<Vertex>              out_prime;
         std::vector<Vertex>              c;
-        std::vector<Vertex>              out = outputs;
+        std::vector<Vertex>              out = getOutputSpiders();
+        std::vector<Vertex>              in  = getInputSpiders();
 
+        uint32_t k = 1;
+
+        for (const auto& row: adjMat) {
+            for (const auto& entry: row) {
+                std::cout << " " << static_cast<int>(entry);
+            }
+            std::cout << std::endl;
+        }
         do {
-            for (const auto& v: outputs) {
-                if (std::find(inputs.begin(), inputs.end(), v) == inputs.end())
+            c = {};
+            std::vector<Vertex> out_prime;
+            std::cout << "Iteration: " << k << std::endl;
+
+            std::cout << "out" << std::endl;
+            for (const auto& v: out)
+                std::cout << static_cast<int>(v) << std::endl;
+            for (const auto& v: out) {
+                if (std::find(in.begin(), in.end(), v) == in.end())
                     out_prime.emplace_back(v);
             }
+
+            std::cout << "out prime" << std::endl;
+            for (const auto& v: out_prime)
+                std::cout << static_cast<int>(v) << std::endl;
+
             std::vector<Vertex> us = getNonOutputs(out);
+
+            std::cout << std::endl
+                      << "non outputs" << std::endl;
+            for (const auto& v: us)
+                std::cout << static_cast<int>(v) << std::endl;
 
             auto system = constructLinearSystem(adjMat, out, out_prime, us);
 
+            for (const auto& row: system) {
+                for (const auto& entry: row) {
+                    std::cout << " " << static_cast<int>(entry);
+                }
+                std::cout << std::endl;
+            }
             auto systemFlint = getFlintMatrix(system);
             systemFlint.set_rref(); // bring to upper triangular form
-            c = solutionFromTriangular(getMatrixFromFlint(systemFlint), us, out_prime.size(), g);
+            std::cout << "so far so good" << std::endl;
+            for (const auto& row: getMatrixFromFlint(systemFlint)) {
+                for (const auto& entry: row) {
+                    std::cout << " " << static_cast<int>(entry);
+                }
+                std::cout << std::endl;
+            }
+            c = solutionFromTriangular(getMatrixFromFlint(systemFlint), us, out_prime.size(), out_prime, g); //TODO may be more efficient when filtering out vertices not connected to any output
+
+            std::cout << "have solutions: " << std::endl;
+            for (const auto& v: c) {
+                partOrd[v] = k;
+                std::cout << v << ", " << std::endl;
+            }
+            k++;
+            out.insert(out.end(), c.begin(), c.end());
         } while (!c.empty());
 
-        return partOrd;
+        if (out.size() != nvertices)
+            return {};
+
+        return gFlow{partOrd, g};
     }
 
     gf2Mat ZXDiagram::getAdjMat() {
@@ -403,13 +453,16 @@ namespace zx {
             adjMat[from][to] = true;
             adjMat[to][from] = true;
         }
+        for (std::size_t i = 0; i < adjMat.size(); ++i) {
+            adjMat[i][i] = true;
+        }
         return adjMat;
     }
 
     std::vector<Vertex> ZXDiagram::getNonOutputs(const std::vector<Vertex>& out) const {
         std::vector<Vertex> nonOuts;
         for (Vertex i = 0; i < vertices.size(); ++i) {
-            if (vertices[i].has_value() && isIn(i, out))
+            if (vertices[i].has_value() && !isIn(i, out) && !isIn(i, outputs) && !isIn(i, inputs))
                 nonOuts.emplace_back(i);
         }
         return nonOuts;
@@ -420,51 +473,115 @@ namespace zx {
     }
 
     gf2Mat ZXDiagram::constructLinearSystem(const gf2Mat& adjMat, std::vector<Vertex> out, std::vector<Vertex> out_prime, std::vector<Vertex> us) const {
-        gf2Mat system(nvertices - out.size(), gf2Vec(nvertices, false));
+        const auto& nRelevantVertices = nvertices - 2 * getNQubits();
+        gf2Mat      system(nRelevantVertices - out.size(), gf2Vec(nRelevantVertices, false));
 
         for (std::size_t row = 0; row < us.size(); ++row) {
             for (std::size_t col = 0; col < out_prime.size(); ++col) {
-                system[row][row] = adjMat[us[row]][out_prime[col]];
+                system[row][col] = adjMat[us[row]][out_prime[col]];
             }
         }
 
-        for (std::size_t curr_col = out_prime.size(); curr_col < nvertices; ++curr_col) {
-            auto idx              = us[curr_col - out_prime.size()];
-            system[idx][curr_col] = true;
+        for (std::size_t curr_col = out_prime.size(); curr_col < nRelevantVertices; ++curr_col) {
+            system[curr_col - out_prime.size()][curr_col] = true;
         }
 
         return system;
     }
 
-    std::vector<Vertex> ZXDiagram::solutionFromTriangular(const gf2Mat& triu, const std::vector<Vertex>& us, std::size_t offset, std::vector<std::vector<Vertex>>& g) const {
-        for (std::size_t col = offset; col < nvertices; ++col) {
-            gf2Vec      sol(triu.size(), false);
-            std::size_t maxNonZeroRow = 0;
-            for (std::size_t i = 0; i < offset; ++i) {
-                if (triu[offset - i][offset - i]) {
-                    maxNonZeroRow = offset - i;
+    std::vector<Vertex> ZXDiagram::solutionFromTriangular(const gf2Mat& triu, const std::vector<Vertex>& us, std::size_t offset, const std::vector<Vertex>& out_prime, std::vector<std::vector<Vertex>>& g) const {
+        std::vector<Vertex> c;
+
+        const auto& nRelevantVertices = nvertices - 2 * getNQubits();
+
+        std::size_t maxNonZeroRow = 0;
+        for (std::size_t i = 0; i < offset; ++i) {
+            if (triu[offset - i - 1][offset - i - 1]) {
+                maxNonZeroRow = offset - i - 1;
+                break;
+            }
+        }
+
+        std::cout << "performing backpropagation with " << maxNonZeroRow << std::endl;
+        //backpropagation
+        for (std::size_t col = offset; col < triu[0].size(); ++col) {
+            std::cout << "computing vector for number " << col << std::endl;
+            gf2Vec sol(offset, false);
+            bool   hasSol = true;
+            for (std::size_t row_comp = 0; row_comp < triu.size() - maxNonZeroRow - 1; ++row_comp) {
+                auto row = triu.size() - row_comp - 1;
+                std::cout << "##### " << row << std::endl;
+                if (triu[row][col]) {
+                    hasSol = false;
                     break;
                 }
             }
 
-            //backpropagation
-            for (std::size_t col = offset; col < triu[0].size(); ++col) {
-                bool hasSol = true;
-                for (std::size_t row = triu.size(); row > maxNonZeroRow; --row) {
-                    if (triu[row][col]) {
-                        hasSol = false;
-                        break;
-                    }
-                }
-                if (!hasSol)
-                    continue;
+            if (!hasSol)
+                continue;
 
-                // TODO: replace by bitwise ops
-                for (std::size_t row_comp = 0; row_comp < offset; ++row_comp) {
-                    auto row     = offset - row_comp - 1; //TODO
-                    int  par_lhs = std::accumulate(trio[row][row].begin() +)
+            std::cout << "passed first test" << std::endl;
+            // TODO: replace by bitwise ops
+            for (std::size_t row_comp = maxNonZeroRow; row_comp < offset; ++row_comp) {
+                auto row = offset - row_comp - 1; //TODO
+                std::cout << "row " << row << std::endl
+                          << std::endl;
+                int sum = static_cast<int>(triu[row][row]);
+                for (std::size_t i = row + 1; i < sol.size(); ++i) {
+                    sum += static_cast<int>(triu[row][i]) * sol[i];
+                }
+
+                if (sum == 0 && triu[row][col]) {
+                    hasSol = false;
+                    break;
+                }
+                sol[row] = sum & (static_cast<int>(triu[row][col]));
+            }
+
+            if (hasSol) {
+                std::cout << "solution vector" << std::endl;
+                for (const auto& x: sol)
+                    std::cout << x << std::endl;
+                std::cout << "end" << std::endl;
+                g[us[col - offset]] = fromIdxVec(sol, out_prime);
+                c.emplace_back(us[col - offset]);
+            }
+        }
+        return c;
+    }
+
+    std::vector<Vertex> ZXDiagram::fromIdxVec(const std::vector<bool>& indicator, const std::vector<Vertex>& set) {
+        std::vector<Vertex> ret;
+        for (std::size_t i = 0; i < indicator.size(); ++i) {
+            if (indicator[i])
+                ret.emplace_back(set[i]);
+        }
+        return ret;
+    }
+
+    std::vector<Vertex> ZXDiagram::getConnectedSet(const std::vector<Vertex> s) const {
+        std::vector<Vertex> connected;
+        for (const auto v: s) {
+            for (const auto [to, _]: incidentEdges(v)) {
+                const auto& p = std::lower_bound(connected.begin(), connected.end(), to);
+                if (p == connected.end()) {
+                    connected.emplace_back(to);
+                    break;
+                }
+                if (*p != to) {
+                    connected.insert(p, to);
                 }
             }
         }
+        return connected;
     }
+
+    std::vector<Vertex> ZXDiagram::getOutputSpiders() const {
+        return getConnectedSet(outputs);
+    }
+
+    std::vector<Vertex> ZXDiagram::getInputSpiders() const {
+        return getConnectedSet(inputs);
+    }
+
 } // namespace zx
