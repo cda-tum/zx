@@ -149,8 +149,8 @@ namespace zx {
         std::vector<Edge>::iterator getEdgePtr(Vertex from, Vertex to);
 
         // void gFlowAux(const gf2Mat& adjMat, std::vector<Vertex> in) const;
-        gf2Mat              getAdjMat();
-        std::vector<Vertex> getNonOutputs(const std::vector<Vertex>& out) const;
+        gf2Mat                                              getAdjMat();
+        std::pair<std::vector<Vertex>, std::vector<Vertex>> getNonProcessed(const std::vector<Vertex>& out) const;
 
         static bool isIn(const Vertex& v, const std::vector<Vertex>& vertices);
 

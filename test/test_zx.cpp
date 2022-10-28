@@ -1,6 +1,7 @@
 #include "Definitions.hpp"
 #include "Rational.hpp"
 #include "Simplify.hpp"
+#include "Utils.hpp"
 #include "ZXDiagram.hpp"
 
 #include <cstddef>
@@ -258,6 +259,53 @@ TEST_F(ZXDiagramTest, testGFlow) {
         const auto& [ord, g] = gFlowOpt.value();
 
         for (const auto& [v, _]: linear.getVertices()) {
+            std::cout << "correcting " << v << " on vertices: ";
+            for (const auto& cv: g[v]) std::cout << cv << ", ";
+            std::cout << std::endl;
+        }
+    }
+}
+
+static zx::ZXDiagram makeEmptyDiagram(const std::size_t nqubits) {
+    auto diag = ::makeIdentityDiagram(nqubits, 0);
+    for (std::size_t i = 0; i < nqubits; ++i) {
+        diag.removeEdge(i, i + nqubits);
+    }
+    return diag;
+}
+
+TEST_F(ZXDiagramTest, testGFlow2) {
+    zx::ZXDiagram diag = makeEmptyDiagram(3);
+    diag.addVertex(0, 0); // 6
+    diag.addVertex(1, 0); // 7
+    diag.addVertex(2, 0); // 8
+    diag.addVertex(0, 0); // 9
+    diag.addVertex(1, 0); // 10
+    diag.addVertex(2, 0); // 11
+
+    diag.addEdge(0, 6, zx::EdgeType::Hadamard);
+    diag.addEdge(1, 7, zx::EdgeType::Hadamard);
+    diag.addEdge(2, 8, zx::EdgeType::Hadamard);
+
+    diag.addEdge(9, 3, zx::EdgeType::Hadamard);
+    diag.addEdge(10, 4, zx::EdgeType::Hadamard);
+    diag.addEdge(11, 5, zx::EdgeType::Hadamard);
+
+    diag.addEdge(6, 9, zx::EdgeType::Hadamard);
+    diag.addEdge(6, 11, zx::EdgeType::Hadamard);
+
+    diag.addEdge(7, 9, zx::EdgeType::Hadamard);
+    diag.addEdge(7, 10, zx::EdgeType::Hadamard);
+    diag.addEdge(7, 11, zx::EdgeType::Hadamard);
+
+    diag.addEdge(8, 10, zx::EdgeType::Hadamard);
+    diag.addEdge(8, 11, zx::EdgeType::Hadamard);
+
+    const auto& gFlowOpt = diag.computeGFlow();
+    if (gFlowOpt.has_value()) {
+        const auto& [ord, g] = gFlowOpt.value();
+
+        for (const auto& [v, _]: diag.getVertices()) {
             std::cout << "correcting " << v << " on vertices: ";
             for (const auto& cv: g[v]) std::cout << cv << ", ";
             std::cout << std::endl;

@@ -11,6 +11,7 @@
 #include <numeric>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 
 namespace zx {
 
@@ -391,22 +392,18 @@ namespace zx {
         }
         do {
             c = {};
-            std::vector<Vertex> out_prime;
             std::cout << "Iteration: " << k << std::endl;
 
             std::cout << "out" << std::endl;
             for (const auto& v: out)
                 std::cout << static_cast<int>(v) << std::endl;
-            for (const auto& v: out) {
-                if (std::find(in.begin(), in.end(), v) == in.end())
-                    out_prime.emplace_back(v);
-            }
+
+            const auto& [us, out_prime] = getNonProcessed(out);
+            if (out_prime.empty()) break;
 
             std::cout << "out prime" << std::endl;
             for (const auto& v: out_prime)
                 std::cout << static_cast<int>(v) << std::endl;
-
-            std::vector<Vertex> us = getNonOutputs(out);
 
             std::cout << std::endl
                       << "non outputs" << std::endl;
@@ -441,7 +438,7 @@ namespace zx {
             out.insert(out.end(), c.begin(), c.end());
         } while (!c.empty());
 
-        if (out.size() != nvertices)
+        if (out.size() != nvertices - 2 * getNQubits())
             return {};
 
         return gFlow{partOrd, g};
@@ -459,13 +456,18 @@ namespace zx {
         return adjMat;
     }
 
-    std::vector<Vertex> ZXDiagram::getNonOutputs(const std::vector<Vertex>& out) const {
+    std::pair<std::vector<Vertex>, std::vector<Vertex>> ZXDiagram::getNonProcessed(const std::vector<Vertex>& out) const {
         std::vector<Vertex> nonOuts;
-        for (Vertex i = 0; i < vertices.size(); ++i) {
-            if (vertices[i].has_value() && !isIn(i, out) && !isIn(i, outputs) && !isIn(i, inputs))
+        for (const Vertex& i: getConnectedSet(out)) {
+            if (!isIn(i, out) && !isIn(i, outputs) && !isIn(i, inputs))
                 nonOuts.emplace_back(i);
         }
-        return nonOuts;
+        std::vector<Vertex> outs;
+        for (const Vertex& i: getConnectedSet(nonOuts)) {
+            if (isIn(i, out) && !isIn(i, outputs) && !isIn(i, inputs))
+                outs.emplace_back(i);
+        }
+        return std::make_pair(nonOuts, outs);
     }
 
     bool ZXDiagram::isIn(const Vertex& v, const std::vector<Vertex>& vertices) {
@@ -473,19 +475,20 @@ namespace zx {
     }
 
     gf2Mat ZXDiagram::constructLinearSystem(const gf2Mat& adjMat, std::vector<Vertex> out, std::vector<Vertex> out_prime, std::vector<Vertex> us) const {
-        const auto& nRelevantVertices = nvertices - 2 * getNQubits();
-        gf2Mat      system(nRelevantVertices - out.size(), gf2Vec(nRelevantVertices, false));
-
+        const auto& nRelevantVertices = out_prime.size() + us.size();
+        gf2Mat      system(nRelevantVertices - out_prime.size(), gf2Vec(nRelevantVertices, false));
+        // std::cout << "size of system " << nRelevantVertices - out.size() << "x" << nRelevantVertices << std::endl;
         for (std::size_t row = 0; row < us.size(); ++row) {
+            std::cout << "ROW " << row << std::endl;
             for (std::size_t col = 0; col < out_prime.size(); ++col) {
                 system[row][col] = adjMat[us[row]][out_prime[col]];
             }
         }
 
+        std::cout << out_prime.size() << " " << nRelevantVertices << std::endl;
         for (std::size_t curr_col = out_prime.size(); curr_col < nRelevantVertices; ++curr_col) {
             system[curr_col - out_prime.size()][curr_col] = true;
         }
-
         return system;
     }
 
@@ -566,7 +569,7 @@ namespace zx {
                 const auto& p = std::lower_bound(connected.begin(), connected.end(), to);
                 if (p == connected.end()) {
                     connected.emplace_back(to);
-                    break;
+                    continue;
                 }
                 if (*p != to) {
                     connected.insert(p, to);
