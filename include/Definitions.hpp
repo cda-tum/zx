@@ -41,5 +41,12 @@ namespace zx {
     using gf2Mat = std::vector<std::vector<bool>>;
     using gf2Vec = std::vector<bool>;
 
-    using gFlow = std::pair<std::vector<uint32_t>, std::vector<std::vector<Vertex>>>;
+    using flow = std::pair<std::vector<std::vector<Vertex>>, std::vector<std::vector<Vertex>>>; // map depth to vertices, map vertices to correction sets
+    enum class MeasurementType { XY,
+                                 XZ,
+                                 YZ };
+    struct Measurement {
+        MeasurementType plane;
+        PiRational      angle;
+    };
 } // namespace zx

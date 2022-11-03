@@ -126,10 +126,13 @@ namespace zx {
         }
 
         //implements the polynomial algorithm for finding a maximally delayed g-flow from https://arxiv.org/pdf/0709.2670.pdf
-        [[nodiscard]] std::optional<gFlow> computeGFlow();
+        // [[nodiscard]] std::optional<flow> computeGFlow();
 
-        std::vector<Vertex> getOutputSpiders() const;
-        std::vector<Vertex> getInputSpiders() const;
+        [[nodiscard]] std::vector<Vertex> getOutputSpiders() const;
+        [[nodiscard]] std::vector<Vertex> getInputSpiders() const;
+
+        // Results not guaranteed to make sense if diagram not graph-like and identity
+        [[nodiscard]] std::optional<Measurement> getMeasurementPlane(Vertex v) const;
 
     private:
         std::vector<std::vector<Edge>>         edges;

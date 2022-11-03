@@ -373,76 +373,76 @@ namespace zx {
         globalPhase += phase;
     }
 
-    [[nodiscard]] std::optional<gFlow> ZXDiagram::computeGFlow() {
-        // TODO : check if diagram is graph-like
-        std::vector<uint32_t>            partOrd(nvertices, 0U); //TODO: technically only the outputs are init to 0
-        std::vector<std::vector<Vertex>> g(nvertices);
-        const auto&                      adjMat = getAdjMat();
-        std::vector<Vertex>              c;
-        std::vector<Vertex>              out = getOutputSpiders();
-        std::vector<Vertex>              in  = getInputSpiders();
+    // [[nodiscard]] std::optional<flow> ZXDiagram::computeGFlow() {
+    //     // TODO : check if diagram is graph-like
+    //     std::vector<uint32_t>            partOrd(nvertices, 0U); //TODO: technically only the outputs are init to 0
+    //     std::vector<std::vector<Vertex>> g(nvertices);
+    //     const auto&                      adjMat = getAdjMat();
+    //     std::vector<Vertex>              c;
+    //     std::vector<Vertex>              out = getOutputSpiders();
+    //     std::vector<Vertex>              in  = getInputSpiders();
 
-        uint32_t k = 1;
+    //     uint32_t k = 1;
 
-        for (const auto& row: adjMat) {
-            for (const auto& entry: row) {
-                std::cout << " " << static_cast<int>(entry);
-            }
-            std::cout << std::endl;
-        }
-        do {
-            c = {};
-            std::cout << "Iteration: " << k << std::endl;
+    //     for (const auto& row: adjMat) {
+    //         for (const auto& entry: row) {
+    //             std::cout << " " << static_cast<int>(entry);
+    //         }
+    //         std::cout << std::endl;
+    //     }
+    //     do {
+    //         c = {};
+    //         std::cout << "Iteration: " << k << std::endl;
 
-            std::cout << "out" << std::endl;
-            for (const auto& v: out)
-                std::cout << static_cast<int>(v) << std::endl;
+    //         std::cout << "out" << std::endl;
+    //         for (const auto& v: out)
+    //             std::cout << static_cast<int>(v) << std::endl;
 
-            const auto& [us, out_prime] = getNonProcessed(out);
-            if (out_prime.empty()) break;
+    //         const auto& [us, out_prime] = getNonProcessed(out);
+    //         if (out_prime.empty()) break;
 
-            std::cout << "out prime" << std::endl;
-            for (const auto& v: out_prime)
-                std::cout << static_cast<int>(v) << std::endl;
+    //         std::cout << "out prime" << std::endl;
+    //         for (const auto& v: out_prime)
+    //             std::cout << static_cast<int>(v) << std::endl;
 
-            std::cout << std::endl
-                      << "non outputs" << std::endl;
-            for (const auto& v: us)
-                std::cout << static_cast<int>(v) << std::endl;
+    //         std::cout << std::endl
+    //                   << "non outputs" << std::endl;
+    //         for (const auto& v: us)
+    //             std::cout << static_cast<int>(v) << std::endl;
 
-            auto system = constructLinearSystem(adjMat, out, out_prime, us);
+    //         auto system = constructLinearSystem(adjMat, out, out_prime, us);
 
-            for (const auto& row: system) {
-                for (const auto& entry: row) {
-                    std::cout << " " << static_cast<int>(entry);
-                }
-                std::cout << std::endl;
-            }
-            auto systemFlint = getFlintMatrix(system);
-            systemFlint.set_rref(); // bring to upper triangular form
-            std::cout << "so far so good" << std::endl;
-            for (const auto& row: getMatrixFromFlint(systemFlint)) {
-                for (const auto& entry: row) {
-                    std::cout << " " << static_cast<int>(entry);
-                }
-                std::cout << std::endl;
-            }
-            c = solutionFromTriangular(getMatrixFromFlint(systemFlint), us, out_prime.size(), out_prime, g); //TODO may be more efficient when filtering out vertices not connected to any output
+    //         for (const auto& row: system) {
+    //             for (const auto& entry: row) {
+    //                 std::cout << " " << static_cast<int>(entry);
+    //             }
+    //             std::cout << std::endl;
+    //         }
+    //         auto systemFlint = getFlintMatrix(system);
+    //         systemFlint.set_rref(); // bring to upper triangular form
+    //         std::cout << "so far so good" << std::endl;
+    //         for (const auto& row: getMatrixFromFlint(systemFlint)) {
+    //             for (const auto& entry: row) {
+    //                 std::cout << " " << static_cast<int>(entry);
+    //             }
+    //             std::cout << std::endl;
+    //         }
+    //         c = solutionFromTriangular(getMatrixFromFlint(systemFlint), us, out_prime.size(), out_prime, g); //TODO may be more efficient when filtering out vertices not connected to any output
 
-            std::cout << "have solutions: " << std::endl;
-            for (const auto& v: c) {
-                partOrd[v] = k;
-                std::cout << v << ", " << std::endl;
-            }
-            k++;
-            out.insert(out.end(), c.begin(), c.end());
-        } while (!c.empty());
+    //         std::cout << "have solutions: " << std::endl;
+    //         for (const auto& v: c) {
+    //             partOrd[v] = k;
+    //             std::cout << v << ", " << std::endl;
+    //         }
+    //         k++;
+    //         out.insert(out.end(), c.begin(), c.end());
+    //     } while (!c.empty());
 
-        if (out.size() != nvertices - 2 * getNQubits())
-            return {};
+    //     if (out.size() != nvertices - 2 * getNQubits())
+    //         return {};
 
-        return gFlow{partOrd, g};
-    }
+    //     return flow{partOrd, g};
+    // }
 
     gf2Mat ZXDiagram::getAdjMat() {
         gf2Mat adjMat{nvertices, gf2Vec(nvertices, false)};
@@ -525,8 +525,8 @@ namespace zx {
 
             std::cout << "passed first test" << std::endl;
             // TODO: replace by bitwise ops
-            for (std::size_t row_comp = maxNonZeroRow; row_comp < offset; ++row_comp) {
-                auto row = offset - row_comp - 1; //TODO
+            for (std::size_t row_comp = 0; row_comp <= maxNonZeroRow; ++row_comp) {
+                auto row = maxNonZeroRow - row_comp; //TODO
                 std::cout << "row " << row << std::endl
                           << std::endl;
                 int sum = static_cast<int>(triu[row][row]);
@@ -587,4 +587,61 @@ namespace zx {
         return getConnectedSet(inputs);
     }
 
+    std::optional<Measurement> ZXDiagram::getMeasurementPlane(Vertex v) const {
+        if (!vertices[v].has_value())
+            return {};
+
+        const auto& data = vertices[v].value();
+
+        if (data.col < 0 || data.type != VertexType::Z)
+            return {};
+
+        std::optional<Edge> gadget{};
+        std::optional<Edge> single{};
+
+        bool isPiOver4 = false;
+        //find vertices defining measurment plane
+        for (const auto& [to, eType]: incidentEdges(v)) {
+            if (degree(to) == 1 && type(to) != VertexType::Boundary) {
+                if (single.has_value())
+                    return {}; // two measurements on one qubit
+                single = {to, eType};
+            } else if (degree(to) == 2 && type(to) != VertexType::Boundary) {
+                bool isGadget = false;
+                for (const auto& [gadgetTo, gadgetEType]: incidentEdges(to)) {
+                    if (degree(gadgetTo) == 1 && type(gadgetTo) != VertexType::Boundary) {
+                        if (single.has_value())
+                            return {}; // two measurements on one qubit
+
+                        single   = {gadgetTo, gadgetEType};
+                        isGadget = true;
+                    }
+                }
+                if (isGadget) {
+                    if (gadget.has_value())
+                        return {}; // two measurments on one qubit
+                    gadget = {to, eType};
+                }
+            }
+        }
+        if (!gadget.has_value() && !single.has_value()) {
+            return Measurement{MeasurementType::XY, data.phase.getConst()};
+        }
+
+        if (!gadget.has_value() && single.has_value()) {
+            const auto& angleVertex = single.value();
+            if (data.phase.isZero())
+                return Measurement{MeasurementType::YZ, phase(angleVertex.to).getConst()};
+            if (data.phase.getConst().isClose(PI / 2, TOLERANCE))
+                return Measurement{MeasurementType::XZ, phase(angleVertex.to).getConst()};
+        }
+
+        const auto& gadgetVertex = gadget.value();
+        const auto& angleVertex  = single.value();
+        if (phase(gadgetVertex.to).isZero()) {
+            return Measurement{MeasurementType::XY, phase(angleVertex.to).getConst() + data.phase.getConst()};
+        }
+
+        return {}; // no proper measurement
+    }
 } // namespace zx
