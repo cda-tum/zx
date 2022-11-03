@@ -63,6 +63,8 @@ namespace zx {
             return edges[v];
         }
 
+        std::vector<Vertex> getConnectedSet(const std::vector<Vertex> s) const;
+
     private:
         std::vector<std::vector<Vertex>> edges{};
         std::vector<Measurement>         measurements{};
@@ -78,7 +80,6 @@ namespace zx {
         gf2Mat constructLinearSystem(const gf2Mat& adjMat, std::vector<Vertex> out, std::vector<Vertex> out_prime, std::vector<Vertex> us) const;
 
         std::vector<Vertex> solutionFromTriangular(const gf2Mat& triu, const std::vector<Vertex>& us, std::size_t offset, const std::vector<Vertex>& out_prime, std::vector<std::vector<Vertex>>& g) const;
-        std::vector<Vertex> getConnectedSet(const std::vector<Vertex> s) const;
 
         static std::vector<Vertex> fromIdxVec(const std::vector<bool>& indicator, const std::vector<Vertex>& set);
     };
