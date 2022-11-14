@@ -162,13 +162,14 @@ namespace zx {
         return edge;
     }
 
-    [[nodiscard]] std::vector<std::pair<Vertex, VertexData&>>
-    ZXDiagram::getVertices() {
+    [[nodiscard]] std::vector<std::pair<Vertex, const VertexData&>>
+    ZXDiagram::getVertices() const {
         Vertices verts(vertices);
+
         return {verts.begin(), verts.end()};
     }
 
-    [[nodiscard]] std::vector<std::pair<Vertex, Vertex>> ZXDiagram::getEdges() {
+    [[nodiscard]] std::vector<std::pair<Vertex, Vertex>> ZXDiagram::getEdges() const {
         Edges es(edges, vertices);
         return {es.begin(), es.end()};
     }
@@ -369,4 +370,15 @@ namespace zx {
         globalPhase += phase;
     }
 
+    gf2Mat ZXDiagram::getAdjMat() const {
+        gf2Mat adjMat{nvertices, gf2Vec(nvertices, false)};
+        for (const auto& [from, to]: getEdges()) {
+            adjMat[from][to] = true;
+            adjMat[to][from] = true;
+        }
+        for (std::size_t i = 0; i < adjMat.size(); ++i) {
+            adjMat[i][i] = true;
+        }
+        return adjMat;
+    }
 } // namespace zx
