@@ -123,7 +123,8 @@ namespace zx {
         [[nodiscard]] bool globalPhaseIsZero() const {
             return globalPhase.isZero();
         }
-        gf2Mat getAdjMat() const;
+        gf2Mat              getAdjMat() const;
+        std::vector<Vertex> getConnectedSet(const std::vector<Vertex>& s) const;
 
     private:
         std::vector<std::vector<Edge>>         edges;
