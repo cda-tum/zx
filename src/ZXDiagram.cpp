@@ -382,10 +382,13 @@ namespace zx {
         return adjMat;
     }
 
-    std::vector<Vertex> ZXDiagram::getConnectedSet(const std::vector<Vertex>& s) const {
+    std::vector<Vertex> ZXDiagram::getConnectedSet(const std::vector<Vertex>& s, const std::vector<Vertex>& exclude) const {
         std::vector<Vertex> connected;
         for (const auto v: s) {
             for (const auto& [to, _]: edges[v]) {
+                if (isIn(to, exclude))
+                    continue;
+
                 const auto& p = std::lower_bound(connected.begin(), connected.end(), to);
                 if (p == connected.end()) {
                     connected.emplace_back(to);

@@ -124,7 +124,7 @@ namespace zx {
             return globalPhase.isZero();
         }
         gf2Mat              getAdjMat() const;
-        std::vector<Vertex> getConnectedSet(const std::vector<Vertex>& s) const;
+        std::vector<Vertex> getConnectedSet(const std::vector<Vertex>& s, const std::vector<Vertex>& exclude = {}) const;
         static bool         isIn(const Vertex& v, const std::vector<Vertex>& vertices);
 
     private:
