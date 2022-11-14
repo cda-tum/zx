@@ -398,4 +398,8 @@ namespace zx {
         }
         return connected;
     }
+
+    bool ZXDiagram::isIn(const Vertex& v, const std::vector<Vertex>& vertices) {
+        return std::find(vertices.begin(), vertices.end(), v) != vertices.end();
+    }
 } // namespace zx

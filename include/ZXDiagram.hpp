@@ -125,6 +125,7 @@ namespace zx {
         }
         gf2Mat              getAdjMat() const;
         std::vector<Vertex> getConnectedSet(const std::vector<Vertex>& s) const;
+        static bool         isIn(const Vertex& v, const std::vector<Vertex>& vertices);
 
     private:
         std::vector<std::vector<Edge>>         edges;
