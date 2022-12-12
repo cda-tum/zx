@@ -22,7 +22,7 @@ public:
    * ----- {3: (Boundary, Phase = 0)}
    */
 protected:
-  virtual void SetUp() {
+  void SetUp() override {
     diag = zx::ZXDiagram();
     diag.addQubits(2);
     diag.addVertex(0, 0, zx::PiExpression(), zx::VertexType::Z);
@@ -37,7 +37,7 @@ protected:
   }
 };
 
-TEST_F(ZXDiagramTest, create_diagram) {
+TEST_F(ZXDiagramTest, createDiagram) {
   EXPECT_EQ(diag.getNVertices(), 7);
   EXPECT_EQ(diag.getNEdges(), 6);
 
@@ -81,7 +81,7 @@ TEST_F(ZXDiagramTest, deletions) {
   EXPECT_EQ(diag.getNEdges(), 2);
 }
 
-TEST_F(ZXDiagramTest, graph_like) {
+TEST_F(ZXDiagramTest, graphLike) {
   diag.toGraphlike();
 
   EXPECT_EQ(diag.getEdge(0, 4).value().type, zx::EdgeType::Hadamard);

@@ -13,7 +13,7 @@ public:
   sym::Term<double> z{sym::Variable("z")};
 };
 
-TEST_F(ExpressionTest, basic_ops_1) {
+TEST_F(ExpressionTest, basicOps1) {
   sym::Expression<double, zx::PiRational> e(x);
 
   EXPECT_EQ(1, e.numTerms());
@@ -33,7 +33,7 @@ TEST_F(ExpressionTest, basic_ops_1) {
   EXPECT_EQ(e[1].getVar().getName(), "y");
 }
 
-TEST_F(ExpressionTest, basic_ops_2) {
+TEST_F(ExpressionTest, basicOps2) {
   sym::Expression<double, zx::PiRational> e1;
   e1 += x;
   e1 += 10.0 * y;
@@ -193,6 +193,5 @@ TEST_F(ExpressionTest, Instantiation) {
   EXPECT_PRED_FORMAT2(testing::FloatLE, e.evaluate(assignment), 5.0);
 
   e += z;
-  [[maybe_unused]] double h;
-  EXPECT_THROW(h = e.evaluate(assignment), sym::SymbolicException);
+  EXPECT_THROW(const auto h = e.evaluate(assignment), sym::SymbolicException);
 }

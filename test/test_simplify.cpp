@@ -54,7 +54,7 @@ TEST_F(SimplifyTest, idSimp) {
   EXPECT_TRUE(diag.globalPhaseIsZero());
 }
 
-TEST_F(SimplifyTest, idSimp_2) {
+TEST_F(SimplifyTest, idSimp2) {
   const std::size_t nqubits = 2U;
   const std::size_t spiders = 100U;
   zx::ZXDiagram     diag    = ::makeIdentityDiagram(nqubits, spiders);
@@ -69,7 +69,7 @@ TEST_F(SimplifyTest, idSimp_2) {
   EXPECT_TRUE(diag.globalPhaseIsZero());
 }
 
-TEST_F(SimplifyTest, spider_fusion) {
+TEST_F(SimplifyTest, spiderFusion) {
   const std::size_t nqubits  = 1U;
   const std::size_t nspiders = 100U;
   zx::ZXDiagram     diag     = ::makeIdentityDiagram(nqubits, nspiders);
@@ -88,7 +88,7 @@ TEST_F(SimplifyTest, spider_fusion) {
   EXPECT_TRUE(diag.globalPhaseIsZero());
 }
 
-TEST_F(SimplifyTest, spider_fusion_2) {
+TEST_F(SimplifyTest, spiderFusion2) {
   const std::size_t nqubits  = 2U;
   const std::size_t nspiders = 5U;
   zx::ZXDiagram     diag     = ::makeIdentityDiagram(nqubits, nspiders);
@@ -111,7 +111,7 @@ TEST_F(SimplifyTest, spider_fusion_2) {
   EXPECT_TRUE(diag.globalPhaseIsZero());
 }
 
-TEST_F(SimplifyTest, spider_fusion_parallel_edges) {
+TEST_F(SimplifyTest, spiderFusionParallelEdges) {
   const std::size_t nqubits  = 1U;
   const std::size_t nspiders = 3U;
   zx::ZXDiagram     diag     = ::makeIdentityDiagram(nqubits, nspiders);
@@ -217,7 +217,7 @@ TEST_F(SimplifyTest, pivotPauli) {
   EXPECT_TRUE(diag.phase(7) == zx::PiExpression(zx::PiRational(0, 1)));
 }
 
-TEST_F(SimplifyTest, interior_clifford) {
+TEST_F(SimplifyTest, interiorClifford) {
   const std::size_t nqubits      = 100U;
   const std::size_t qubitSpiders = 100U;
   zx::ZXDiagram     diag         = ::makeIdentityDiagram(nqubits, qubitSpiders);
@@ -232,7 +232,7 @@ TEST_F(SimplifyTest, interior_clifford) {
   EXPECT_TRUE(diag.globalPhaseIsZero());
 }
 
-TEST_F(SimplifyTest, interior_clifford_2) {
+TEST_F(SimplifyTest, interiorClifford2) {
   zx::ZXDiagram diag(1);
   diag.removeEdge(0, 1);
 
@@ -262,7 +262,7 @@ TEST_F(SimplifyTest, interior_clifford_2) {
   EXPECT_FALSE(diag.isIdentity());
 }
 
-TEST_F(SimplifyTest, non_pauli_pivot) {
+TEST_F(SimplifyTest, nonPauliPivot) {
   zx::ZXDiagram diag(1);
   diag.removeEdge(0, 1);
 
@@ -290,7 +290,7 @@ TEST_F(SimplifyTest, non_pauli_pivot) {
   EXPECT_TRUE(diag.globalPhaseIsZero());
 }
 
-TEST_F(SimplifyTest, pauli_pivot_2) {
+TEST_F(SimplifyTest, pauliPivot2) {
   zx::ZXDiagram diag(1);
   diag.removeEdge(0, 1);
 
@@ -342,7 +342,7 @@ TEST_F(SimplifyTest, gadgetSimp) {
   EXPECT_TRUE(diag.globalPhaseIsZero());
 }
 
-TEST_F(SimplifyTest, gadgetSimp_2) {
+TEST_F(SimplifyTest, gadgetSimp2) {
   zx::ZXDiagram diag = ::makeEmptyDiagram(1);
   diag.addVertex(0);                                            // 2
   diag.addVertex(0);                                            // 3
@@ -367,7 +367,7 @@ TEST_F(SimplifyTest, gadgetSimp_2) {
   EXPECT_TRUE(diag.globalPhaseIsZero());
 }
 
-TEST_F(SimplifyTest, fullReduce_2) {
+TEST_F(SimplifyTest, fullReduce2) {
   zx::ZXDiagram diag = ::makeEmptyDiagram(2);
 
   diag.addVertex(0, 0, zx::PiExpression(zx::PiRational(1, 32)),
