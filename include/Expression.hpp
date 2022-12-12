@@ -187,7 +187,7 @@ namespace sym {
                             return lhs.getVar() < rhs.getVar();
                         });
                 if (insertPos != terms.end() && insertPos->getVar() == t->getVar()) {
-                    if (insertPos->getCoeff() == -t->getCoeff()) {
+                    if (std::abs(insertPos->getCoeff() + t->getCoeff()) < TOLERANCE) {
                         terms.erase(insertPos);
                     } else {
                         insertPos->addCoeff(t->getCoeff());
@@ -416,7 +416,7 @@ namespace sym {
 
     template<typename T, typename U>
     inline bool operator==(const Expression<T, U>& lhs, const Expression<T, U>& rhs) {
-        if (lhs.numTerms() != rhs.numTerms() || lhs.getConst() != rhs.getConst()) {
+        if (lhs.numTerms() != rhs.numTerms() || std::abs(lhs.getConst() - rhs.getConst()) >= TOLERANCE) {
             return false;
         }
 
