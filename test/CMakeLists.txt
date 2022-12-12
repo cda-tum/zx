@@ -1,6 +1,6 @@
 if(NOT TARGET gtest OR NOT TARGET gmock)
   # Prevent overriding the parent project's compiler/linker settings on Windows
-  set(gtest_force_shared_crt
+  set(gtest_force_shared_crt # cmake-lint: disable=C0103
       ON
       CACHE BOOL "" FORCE)
   add_subdirectory("${PROJECT_SOURCE_DIR}/extern/googletest" "extern/googletest" EXCLUDE_FROM_ALL)
@@ -22,27 +22,28 @@ if(NOT TARGET gtest OR NOT TARGET gmock)
   endif()
 endif()
 
-macro(package_add_test TESTNAME)
-  # create an exectuable in which the tests will be stored
-  add_executable(${TESTNAME} ${ARGN})
-  # link the Google test infrastructure and a default main fuction to the test executable.
-  target_link_libraries(${TESTNAME} PRIVATE ${PROJECT_NAME} gmock gtest_main)
+# macro to add a test executable for one of the project libraries
+macro(PACKAGE_ADD_TEST testname)
+  # create an executable in which the tests will be stored
+  add_executable(${testname} ${ARGN})
+  # link the Google test infrastructure and a default main function to the test executable.
+  target_link_libraries(${testname} PRIVATE ${PROJECT_NAME} gmock gtest_main)
   # discover tests
   gtest_discover_tests(
-    ${TESTNAME}
+    ${testname}
     WORKING_DIRECTORY ${PROJECT_DIR}
     PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${PROJECT_DIR}")
   set_target_properties(
-    ${TESTNAME}
+    ${testname}
     PROPERTIES FOLDER tests
                CMAKE_CXX_STANDARD_REQUIRED ON
                CXX_EXTENSIONS OFF)
   add_custom_command(
-    TARGET ${TESTNAME}
+    TARGET ${testname}
     POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE_DIR:${TESTNAME}>/${TESTNAME}
-            ${CMAKE_BINARY_DIR}/${TESTNAME}
-    COMMENT "Creating symlinks for ${TESTNAME}"
+    COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE_DIR:${testname}>/${testname}
+            ${CMAKE_BINARY_DIR}/${testname}
+    COMMENT "Creating symlinks for ${testname}"
     VERBATIM)
 endmacro()
 
