@@ -416,7 +416,7 @@ namespace sym {
 
     template<typename T, typename U>
     inline bool operator==(const Expression<T, U>& lhs, const Expression<T, U>& rhs) {
-        if (lhs.numTerms() != rhs.numTerms() || std::abs(lhs.getConst() - rhs.getConst()) >= TOLERANCE) {
+        if (lhs.numTerms() != rhs.numTerms() || lhs.getConst() != rhs.getConst()) {
             return false;
         }
 
