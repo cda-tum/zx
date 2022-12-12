@@ -67,7 +67,8 @@ class Term {
 public:
   [[nodiscard]] Variable getVar() const { return var; }
   [[nodiscard]] T        getCoeff() const { return coeff; }
-  [[nodiscard]] bool     hasZeroCoeff() const {
+
+  [[nodiscard]] bool hasZeroCoeff() const {
     return std::abs(static_cast<double>(coeff)) < TOLERANCE;
   }
 
