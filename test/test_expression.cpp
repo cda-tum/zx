@@ -193,5 +193,6 @@ TEST_F(ExpressionTest, Instantiation) {
   EXPECT_PRED_FORMAT2(testing::FloatLE, e.evaluate(assignment), 5.0);
 
   e += z;
-  EXPECT_THROW(const auto h = e.evaluate(assignment), sym::SymbolicException);
+  EXPECT_THROW([[maybe_unused]] const auto h = e.evaluate(assignment),
+               sym::SymbolicException);
 }

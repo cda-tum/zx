@@ -28,9 +28,11 @@ public:
 };
 
 struct Variable {
-  static std::unordered_map<std::string, std::size_t> registered;
-  static std::unordered_map<std::size_t, std::string> names;
-  static std::size_t                                  nextId;
+  // NOLINTBEGIN(cppcoreguidelines-avoid-non-const-global-variables)
+  static inline std::unordered_map<std::string, std::size_t> registered{};
+  static inline std::unordered_map<std::size_t, std::string> names{};
+  static inline std::size_t                                  nextId{};
+  // NOLINTEND(cppcoreguidelines-avoid-non-const-global-variables)
 
   explicit Variable(const std::string& name);
 

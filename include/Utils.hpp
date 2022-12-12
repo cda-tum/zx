@@ -60,7 +60,7 @@ public:
     VertexIterator operator++();
 
     // Postfix increment
-    const VertexIterator operator++(int);
+    VertexIterator operator++(int);
 
     friend bool operator==(const VertexIterator& a, const VertexIterator& b);
     friend bool operator!=(const VertexIterator& a, const VertexIterator& b);
@@ -75,8 +75,8 @@ public:
 
   using iterator = VertexIterator;
 
-  const iterator begin() { return VertexIterator(vertices); }
-  const iterator end() { return {vertices, vertices.size()}; }
+  iterator begin() { return VertexIterator(vertices); }
+  iterator end() { return {vertices, vertices.size()}; }
 
 private:
   const std::vector<std::optional<VertexData>>& vertices;
@@ -109,7 +109,7 @@ public:
     EdgeIterator operator++();
 
     // Postfix increment
-    const EdgeIterator operator++(int);
+    EdgeIterator operator++(int);
 
     friend bool operator==(const EdgeIterator& a, const EdgeIterator& b);
     friend bool operator!=(const EdgeIterator& a, const EdgeIterator& b);
@@ -126,8 +126,8 @@ public:
 
   using iterator = EdgeIterator;
 
-  const iterator begin() { return {edges, vertices}; }
-  const iterator end() { return {edges, vertices, edges.size()}; }
+  iterator begin() { return {edges, vertices}; }
+  iterator end() { return {edges, vertices, edges.size()}; }
 
 private:
   const std::vector<std::vector<Edge>>&         edges;

@@ -89,16 +89,13 @@ void ZXDiagram::removeHalfEdge(const Vertex from, const Vertex to) {
 
 Vertex ZXDiagram::addVertex(const VertexData& data) {
   ++nvertices;
-  Vertex v = 0;
   if (!deleted.empty()) {
-    v = deleted.back();
+    const auto v = deleted.back();
     deleted.pop_back();
     vertices[v] = data;
     edges[v].clear();
     return v;
   }
-
-  v = nvertices;
   vertices.emplace_back(data);
   edges.emplace_back();
 
@@ -391,8 +388,9 @@ ZXDiagram::getConnectedSet(const std::vector<Vertex>& s,
   std::vector<Vertex> connected;
   for (const auto v : s) {
     for (const auto& [to, _] : edges[v]) {
-      if (isIn(to, exclude))
+      if (isIn(to, exclude)) {
         continue;
+      }
 
       const auto& p = std::lower_bound(connected.begin(), connected.end(), to);
       if (p == connected.end()) {

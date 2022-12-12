@@ -5,11 +5,6 @@
 #include <string>
 
 namespace sym {
-std::unordered_map<std::string, std::size_t> Variable::registered =
-    std::unordered_map<std::string, std::size_t>();
-std::unordered_map<std::size_t, std::string> Variable::names =
-    std::unordered_map<std::size_t, std::string>();
-std::size_t Variable::nextId;
 
 Variable::Variable(const std::string& name) {
   const auto it = registered.find(name);

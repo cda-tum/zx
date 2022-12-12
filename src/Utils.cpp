@@ -24,7 +24,7 @@ Vertices::VertexIterator Vertices::VertexIterator::operator++() {
 }
 
 // Postfix increment
-const Vertices::VertexIterator Vertices::VertexIterator::operator++(int) {
+Vertices::VertexIterator Vertices::VertexIterator::operator++(int) {
   ++currentPos;
   ++v;
   nextValidVertex();
@@ -115,7 +115,7 @@ void Edges::EdgeIterator::checkNextVertex() {
   }
 }
 // Postfix increment
-const Edges::EdgeIterator Edges::EdgeIterator::operator++(int) {
+Edges::EdgeIterator Edges::EdgeIterator::operator++(int) {
   ++currentPos;
   checkNextVertex();
   return *this;

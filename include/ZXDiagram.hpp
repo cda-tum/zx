@@ -126,8 +126,8 @@ public:
   void                       addGlobalPhase(const PiExpression& phase);
   [[nodiscard]] PiExpression getGlobalPhase() const { return globalPhase; }
   [[nodiscard]] bool globalPhaseIsZero() const { return globalPhase.isZero(); }
-  gf2Mat             getAdjMat() const;
-  std::vector<Vertex>
+  [[nodiscard]] gf2Mat getAdjMat() const;
+  [[nodiscard]] std::vector<Vertex>
               getConnectedSet(const std::vector<Vertex>& s,
                               const std::vector<Vertex>& exclude = {}) const;
   static bool isIn(const Vertex& v, const std::vector<Vertex>& vertices);

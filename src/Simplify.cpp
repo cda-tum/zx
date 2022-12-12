@@ -5,65 +5,65 @@
 #include "ZXDiagram.hpp"
 
 #include <utility>
-#include <vector>
 
 namespace zx {
-std::size_t simplifyVertices(ZXDiagram& diag, VertexCheckFun check,
-                             VertexRuleFun rule) {
-  std::size_t n_simplifications = 0;
-  bool        new_matches       = true;
+std::size_t simplifyVertices(ZXDiagram& diag, const VertexCheckFun check,
+                             const VertexRuleFun rule) {
+  std::size_t nSimplifications = 0;
+  bool        newMatches       = true;
 
-  while (new_matches) {
-    new_matches = false;
-    for (auto [v, _] : diag.getVertices()) {
+  while (newMatches) {
+    newMatches = false;
+    for (const auto [v, _] : diag.getVertices()) {
       if (check(diag, v)) {
         rule(diag, v);
-        new_matches = true;
-        n_simplifications++;
+        newMatches = true;
+        nSimplifications++;
       }
     }
   }
 
-  return n_simplifications;
+  return nSimplifications;
 }
 
-std::size_t simplifyEdges(ZXDiagram& diag, EdgeCheckFun check,
-                          EdgeRuleFun rule) {
-  std::size_t n_simplifications = 0;
-  bool        new_matches       = true;
+std::size_t simplifyEdges(ZXDiagram& diag, const EdgeCheckFun check,
+                          const EdgeRuleFun rule) {
+  std::size_t nSimplifications = 0;
+  bool        newMatches       = true;
 
-  while (new_matches) {
-    new_matches = false;
-    for (auto [v0, v1] : diag.getEdges()) {
+  while (newMatches) {
+    newMatches = false;
+    for (const auto [v0, v1] : diag.getEdges()) {
       if (diag.isDeleted(v0) || diag.isDeleted(v1) || !check(diag, v0, v1)) {
         continue;
       }
       rule(diag, v0, v1);
-      new_matches = true;
-      n_simplifications++;
+      newMatches = true;
+      nSimplifications++;
     }
   }
 
-  return n_simplifications;
+  return nSimplifications;
 }
 
 std::size_t gadgetSimp(ZXDiagram& diag) {
-  std::size_t n_simplifications = 0;
-  bool        new_matches       = true;
+  std::size_t nSimplifications = 0;
+  bool        newMatches       = true;
 
-  while (new_matches) {
-    new_matches = false;
+  while (newMatches) {
+    newMatches = false;
     for (auto [v, _] : diag.getVertices()) {
-      if (diag.isDeleted(v))
+      if (diag.isDeleted(v)) {
         continue;
+      }
 
       if (checkAndFuseGadget(diag, v)) {
-        new_matches = true;
-        n_simplifications++;
+        newMatches = true;
+        nSimplifications++;
       }
     }
   }
-  return n_simplifications;
+  return nSimplifications;
 }
 
 std::size_t idSimp(ZXDiagram& diag) {
@@ -89,38 +89,38 @@ std::size_t pivotSimp(ZXDiagram& diag) {
 std::size_t interiorCliffordSimp(ZXDiagram& diag) {
   spiderSimp(diag);
 
-  bool        new_matches       = true;
-  std::size_t n_simplifications = 0;
-  std::size_t n_id, n_spider, n_pivot, n_localComp;
-  while (new_matches) {
-    new_matches = false;
-    n_id        = idSimp(diag);
-    n_spider    = spiderSimp(diag);
-    n_pivot     = pivotPauliSimp(diag);
-    n_localComp = localCompSimp(diag);
+  bool        newMatches       = true;
+  std::size_t nSimplifications = 0;
+  std::size_t nId{}, nSpider{}, nPivot{}, nLocalComp{};
+  while (newMatches) {
+    newMatches = false;
+    nId        = idSimp(diag);
+    nSpider    = spiderSimp(diag);
+    nPivot     = pivotPauliSimp(diag);
+    nLocalComp = localCompSimp(diag);
 
-    if (n_id + n_spider + n_pivot + n_localComp != 0) {
-      new_matches = true;
-      n_simplifications++;
+    if ((nId + nSpider + nPivot + nLocalComp) != 0) {
+      newMatches = true;
+      nSimplifications++;
     }
   }
-  return n_simplifications;
+  return nSimplifications;
 }
 
 std::size_t cliffordSimp(ZXDiagram& diag) {
-  bool        new_matches       = true;
-  std::size_t n_simplifications = 0;
-  std::size_t n_clifford, n_pivot;
-  while (new_matches) {
-    new_matches = false;
-    n_clifford  = interiorCliffordSimp(diag);
-    n_pivot     = pivotSimp(diag);
-    if (n_clifford + n_pivot != 0) {
-      new_matches = true;
-      n_simplifications++;
+  bool        newMatches       = true;
+  std::size_t nSimplifications = 0;
+  std::size_t nClifford{}, nPivot{};
+  while (newMatches) {
+    newMatches = false;
+    nClifford  = interiorCliffordSimp(diag);
+    nPivot     = pivotSimp(diag);
+    if ((nClifford + nPivot) != 0) {
+      newMatches = true;
+      nSimplifications++;
     }
   }
-  return n_simplifications;
+  return nSimplifications;
 }
 
 std::size_t pivotgadgetSimp(ZXDiagram& diag) {
@@ -131,30 +131,31 @@ std::size_t fullReduce(ZXDiagram& diag) {
   diag.toGraphlike();
   interiorCliffordSimp(diag);
 
-  std::size_t n_gadget, n_pivot;
-  std::size_t n_simplifications = 0;
+  std::size_t nGadget{}, nPivot{};
+  std::size_t nSimplifications = 0;
   while (true) {
     cliffordSimp(diag);
-    n_gadget = gadgetSimp(diag);
+    nGadget = gadgetSimp(diag);
     interiorCliffordSimp(diag);
-    n_pivot = pivotgadgetSimp(diag);
-    if (n_gadget + n_pivot == 0)
+    nPivot = pivotgadgetSimp(diag);
+    if ((nGadget + nPivot) == 0) {
       break;
-    n_simplifications += n_gadget + n_pivot;
+    }
+    nSimplifications += nGadget + nPivot;
   }
   diag.removeDisconnectedSpiders();
 
-  return n_simplifications;
+  return nSimplifications;
 }
 
-std::size_t fullReduceApproximate(ZXDiagram& diag, fp tolerance) {
+std::size_t fullReduceApproximate(ZXDiagram& diag, const fp tolerance) {
   auto        nSimplifications = fullReduce(diag);
   std::size_t newSimps         = 0;
   do {
     diag.approximateCliffords(tolerance);
     newSimps = fullReduce(diag);
     nSimplifications += newSimps;
-  } while (newSimps);
+  } while (newSimps != 0u);
   return nSimplifications;
 }
 } // namespace zx
