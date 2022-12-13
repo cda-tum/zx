@@ -53,13 +53,12 @@ std::size_t interiorCliffordSimp(ZXDiagram& diag) {
 
   bool        newMatches       = true;
   std::size_t nSimplifications = 0;
-  std::size_t nId{}, nSpider{}, nPivot{}, nLocalComp{};
   while (newMatches) {
-    newMatches = false;
-    nId        = idSimp(diag);
-    nSpider    = spiderSimp(diag);
-    nPivot     = pivotPauliSimp(diag);
-    nLocalComp = localCompSimp(diag);
+    newMatches            = false;
+    const auto nId        = idSimp(diag);
+    const auto nSpider    = spiderSimp(diag);
+    const auto nPivot     = pivotPauliSimp(diag);
+    const auto nLocalComp = localCompSimp(diag);
 
     if ((nId + nSpider + nPivot + nLocalComp) != 0) {
       newMatches = true;
@@ -72,11 +71,10 @@ std::size_t interiorCliffordSimp(ZXDiagram& diag) {
 std::size_t cliffordSimp(ZXDiagram& diag) {
   bool        newMatches       = true;
   std::size_t nSimplifications = 0;
-  std::size_t nClifford{}, nPivot{};
   while (newMatches) {
-    newMatches = false;
-    nClifford  = interiorCliffordSimp(diag);
-    nPivot     = pivotSimp(diag);
+    newMatches           = false;
+    const auto nClifford = interiorCliffordSimp(diag);
+    const auto nPivot    = pivotSimp(diag);
     if ((nClifford + nPivot) != 0) {
       newMatches = true;
       nSimplifications++;
@@ -93,13 +91,12 @@ std::size_t fullReduce(ZXDiagram& diag) {
   diag.toGraphlike();
   interiorCliffordSimp(diag);
 
-  std::size_t nGadget{}, nPivot{};
   std::size_t nSimplifications = 0;
   while (true) {
     cliffordSimp(diag);
-    nGadget = gadgetSimp(diag);
+    const auto nGadget = gadgetSimp(diag);
     interiorCliffordSimp(diag);
-    nPivot = pivotgadgetSimp(diag);
+    const auto nPivot = pivotgadgetSimp(diag);
     if ((nGadget + nPivot) == 0) {
       break;
     }
@@ -117,7 +114,7 @@ std::size_t fullReduceApproximate(ZXDiagram& diag, const fp tolerance) {
     diag.approximateCliffords(tolerance);
     newSimps = fullReduce(diag);
     nSimplifications += newSimps;
-  } while (newSimps != 0u);
+  } while (newSimps != 0U);
   return nSimplifications;
 }
 } // namespace zx
