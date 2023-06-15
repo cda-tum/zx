@@ -1,3 +1,7 @@
+> **Warning**
+> As of June 2023, this repository is no longer actively maintained. All code has been directly integrated into [MQT Core](https://github.com/cda-tum/mqt-core).
+> Development is expected to continue there. No new contributions will be accepted here.
+
 ![OS](https://img.shields.io/badge/os-linux%20%7C%20macos%20%7C%20windows-blue?style=flat-square)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 [![CI](https://img.shields.io/github/actions/workflow/status/cda-tum/zx/ci.yml?branch=main&style=flat-square&logo=github&label=c%2B%2B)](https://github.com/cda-tum/zx/actions/workflows/ci.yml)
